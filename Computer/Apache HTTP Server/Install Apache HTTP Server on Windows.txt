@@ -1,0 +1,27 @@
+For Apache 2.4.3 with PHP 5.4.11
+============================================================
+Download the binary ZIP file (EG. php-5.4.11-Win32-VC9-x86.zip) from Apache Lounge. Apache official website does not provide any binary build for Windows on new version of Apache
+
+Make sure Visual C++ 2010 Runtime has been installed if the Apache binary is compiled with VC10 compiled
+
+Unzip the files to installation location such as d:\Apache24
+
+Edit the configiration file "conf\httpd.conf" and add the following line
+	LoadModule php5_module "d:/php54/php5apache2_4.dll"
+	# PHP is an HTML-embedded scripting language which attempts to make it
+	# easy for developers to write dynamically generated webpages.
+	#
+	<IfModule php5_module>
+	AddHandler application/x-httpd-php .php
+	PHPIniDir "d:/php54"
+	DirectoryIndex index.php
+	</IfModule>
+
+Start Apache in console mode
+	d:\apache24\bin\httpd.exe -X
+
+Install Apache as service
+	d:\apache24\bin\httpd.exe -k install
+
+Remove Apache as service
+	d:\apache24\bin\httpd.exe -k uninstall

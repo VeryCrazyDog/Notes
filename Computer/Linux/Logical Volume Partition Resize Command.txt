@@ -1,0 +1,46 @@
+# Check status
+df -h
+lvm lvs
+lvm vgdisplay /dev/VolGroup00
+
+# Unmount all
+swapoff /dev/VolGroup00/LogVol04
+umount /mnt/sysimage/home
+umount /mnt/sysimage/usr
+umount /mnt/sysimage/var
+umount /mnt/sysimage/boot
+umount -l /mnt/sysimage/dev
+umount -l /mnt/sysimage
+
+# Reduce / to 20G
+e2fsck -f /dev/VolGroup00/LogVol00
+resize2fs -p /dev/VolGroup00/LogVol00 20G
+lvm lvreduce -L 20G /dev/VolGroup00/LogVol00
+
+# Reduce /usr to 40G
+e2fsck -f /dev/VolGroup00/LogVol02
+resize2fs -p /dev/VolGroup00/LogVol02 40G
+lvm lvreduce -L 40G /dev/VolGroup00/LogVol02
+
+#Extend /home to 80G
+lvm lvextend -L 80G /dev/VolGroup00/LogVol01
+e2fsck -f /dev/VolGroup00/LogVol01
+resize2fs -p /dev/VolGroup00/LogVol01 80G
+
+#Extend /var to 120G
+lvm lvextend -L 120G /dev/VolGroup00/LogVol03
+e2fsck -f /dev/VolGroup00/LogVol03
+resize2fs -p /dev/VolGroup00/LogVol03 120G
+
+#Extend swap to RAM size (4GB) x 2 + 1MB
+lvm lvextend -L 8193M /dev/VolGroup00/LogVol04
+
+#Fill up to / with the rest of the free space
+lvm lvextend -l +100%FREE /dev/VolGroup00/LogVol00
+e2fsck -f /dev/VolGroup00/LogVol00
+resize2fs -p /dev/VolGroup00/LogVol00
+
+# Recreate swap after reboot
+swapoff -v /dev/VolGroup00/LogVol04
+mkswap /dev/VolGroup00/LogVol04
+swapon -v /dev/VolGroup00/LogVol04

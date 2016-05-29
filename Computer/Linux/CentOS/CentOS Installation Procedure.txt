@@ -1,0 +1,315 @@
+Notice: This procedure should not contain specialized settings
+
+---------------------Preparation Task---------------------
+
+Download and burn the latest OS installation disc
+Decide the partition layout
+
+---------------------OS Installation---------------------
+
+Configure the following options
+	# English (Hong Kong SAR) is not used as installation language to avoid incompatibility.
+	Installation Language: English (United States)
+	Date & Time: Asia/Hong Kong timezone
+	Keyboard: English (US)
+	Language Support:
+		English (United States)
+		English (Hong Kong SAR China)
+		Chinese (China)
+		Chinese (Hong Kong SAR China)
+		Japanese (Japan)
+	Installation Source: Local media
+	Software Selection:
+		Base Environment: Infrastructure Server
+		Add-Ons:
+			Hardware Monitoring Utilities
+Set up network and hostname
+	Set hostname
+	(If needed) Set Ethernet device
+		General:
+			Automatically connect to this network when it is available: Checked
+			All users may connect to this network: Checked
+		IPv6 Settings:
+			Method: Ignore
+	(If needed) Add team device
+		Connection name: team0
+		Interface name: team0
+		Automatically connect to this network when it is available: Checked
+		Teamed connections:
+			Conncetion 1:
+				Connection type: Ethernet
+				Connection name: eth0
+				Automatically connect to this network when it is available: Checked
+				Device MAC address: (Set to the MAC address of port #1 of the server)
+			Connection 2:
+				Connection type: Ethernet
+				Connection name: eth1
+				Automatically connect to this network when it is available: Checked
+				Device MAC address: (Set to the MAC address of port #2 of the server)
+		JSON config:
+			{"runner": {"name": "activebackup"}, "link_watch": {"name": "ethtool"}}
+		JSON config (In case the above failure, try this one which works on VirtualBox host-only adapater):
+			{"runner": {"name": "activebackup", "hwaddr_policy": "by_active"}, "link_watch": {"name": "ethtool"}}
+		IPv6 Settings:
+			Method: Ignore
+(If needed) Set up Network Time (This will use chrony suite, which is recommended for all systems which are frequently suspended or otherwise intermittently disconnected and reconnected to a network such as mobile and virtual systems. Do not set up network time during installation if you would like to use ntpd, which is for systems which are normally kept permanently on)
+	(If needed) Uncheck all checkbox in column "Use" in "Add and mark for usage NTP servers" dialog
+	(If needed) Input NTP server address and press the add button
+Set partition layout, reference https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Installation_Guide/sect-disk-partitioning-setup-x86.html#sect-recommended-partitioning-scheme-x86
+	/boot                     Defaut size
+	LVM                       Remaining space
+		/                     At least 5GB, recommended at least 10GB
+		/home                 At least 1GB
+		/tmp                  Minimum 50MB
+		/var                  At least 3GB
+		/var/log              At least 1GB
+		/var/log/audit        At least 250MB
+		swap                  At least 1GB
+Set root password
+(If needed) Set user creation
+
+---------------------Network Configuration---------------------
+
+(If needed) Modify NIC and DNS setting
+vim /etc/sysconfig/network-scripts/ifcfg-<interface>
+
+(If needed) Configure proxy
+vim /etc/environment
+	# Include the following lines
+	export http_proxy='http://proxy.example.com:8080/'
+	export https_proxy='http://proxy.example.com:8080/'
+
+---------------------Network Testing---------------------
+
+# Check teaming status and test active-backup by unpluging Ethernet cable
+teamdctl team0 state
+
+---------------------Firewall Configuration---------------------
+
+# Get the status of firewalld
+firewall-cmd --state
+
+# Get a list of all supported zones
+firewall-cmd --get-zones
+
+# Get active zones
+firewall-cmd --get-active-zones
+
+# Query if an interface is in a zone
+firewall-cmd [--permanent] --get-zone-of-interface=<interface>
+firewall-cmd [--permanent] [--zone=<zone>] --query-interface=<interface>
+
+# Change the zone of an interface belongs to (it may not work on Ethernet device due to a bug described at https://bugs.centos.org/view.php?id=7526)
+firewall-cmd [--permanent] [--zone=<zone>] --change-interface=<interface>
+
+# Set the zone of an interface in ifcfg file
+cat "/etc/sysconfig/network-scripts/ifcfg-<interface>"
+echo "ZONE=<zone>" >> "/etc/sysconfig/network-scripts/ifcfg-<interface>"
+cat "/etc/sysconfig/network-scripts/ifcfg-<interface>"
+
+# Apply change after zone is set in ifcfg
+systemctl restart network
+
+# Print zone <zone> with the enabled features
+firewall-cmd [--permanent] [--zone=<zone>] --list-all
+
+# Add a new zone using a XML template
+cp new_zone.xml /etc/firewalld/zones/<zone>.xml
+restorecon /etc/firewalld/zones/<zone>.xml
+chcon -u system_u /etc/firewalld/zones/<zone>.xml
+
+# Add a new zone
+firewall-cmd --permanent --new-zone=<zone>
+
+# Delete a new zone
+firewall-cmd --permanent --delete-zone=<zone>
+
+# To get the list of the sources currently bound to a zone
+firewall-cmd [--permanent] --zone=<zone> --list-sources
+
+# Add a source to a zone
+# To get this feature, Firewalld relies on NetworkManager
+firewall-cmd [--permanent] --zone=<zone> --add-source=<ip>/<netmask>
+
+# To get the list of services bound to a zone
+firewall-cmd [--permanent] --zone=<zone> --list-services
+
+# Get a list of supported permanent services
+firewall-cmd [--permanent] --get-services
+
+# Add a service in a zone
+firewall-cmd [--permanent] [--zone=<zone>] --add-service=<service>
+
+# Remove a service in a zone
+firewall-cmd [--permanent] [--zone=<zone>] --remove-service=<service>
+
+# Add new service
+firewall-cmd --permanent --new-service=<service>
+chmod 640 /etc/firewalld/services/<service>.xml
+
+# Add a new user-defined service using a XML template
+cp /usr/lib/firewalld/services/mysql.xml /etc/firewalld/services/<service>.xml
+restorecon /etc/firewalld/services/<service>.xml
+chcon -u system_u /etc/firewalld/services/<service>.xml
+vim /etc/firewalld/services/<service>.xml
+
+# Remove an existing user-defined service
+firewall-cmd --permanent --delete-service=<service>
+
+# Enable a port and protocol combination in a zone
+firewall-cmd [--permanent] [--zone=<zone>] --add-port=<port>[-<port>]/<protocol>
+
+# Remove a port and protocol combination in a zone
+firewall-cmd [--permanent] [--zone=<zone>] --remove-port=<port>[-<port>]/<protocol>
+
+# Enable a source address in a zone
+firewall-cmd [--permanent] [--zone=<zone>] --add-rich-rule="rule family="ipv4" source address="<address>/<netmask>" accept"
+
+# Disable a source address in a zone
+firewall-cmd [--permanent] [--zone=<zone>] --remove-rich-rule="rule family="ipv4" source address="<address>/<netmask>" accept"
+
+# Reload the firewall without loosing state information
+firewall-cmd --reload
+
+# Restart firewalld
+systemctl restart firewalld
+
+---------------------NTP Configuration---------------------
+
+(If needed) Disable and remove chronyd
+	yum autoremove chrony
+	rm -i /etc/chrony.keys.rpmsave
+	rmdir /var/log/chrony
+
+(If needed) Set up NTP using ntpd (For systems which are normally kept permanently on)
+	yum install ntp
+	vim /etc/ntp.conf
+		# Comment out CentOS public NTP server
+		# Include the following line
+		server <host> iburst
+	systemctl enable ntpd
+	systemctl start ntpd
+
+(If needed) Modify NTP for chronyd
+	vim /etc/chrony.conf
+		# Include or modify the following line
+		server <host> iburst
+
+---------------------NTP Testing---------------------
+
+# Check if NTP host is reachable
+ntpdate -d <host>
+
+# Show ntpd status
+ntpstat
+
+# Force NTP to sync with given NTP host
+systemctl stop ntpd
+ntpdate -s <host>
+systemctl start ntpd
+
+# Display system time information including NTP sync status
+chronyc tracking
+
+# Display information about current sources
+chronyc sources -v
+
+---------------------Package Management---------------------
+
+(If needed) Install telnet package
+	yum install telnet
+Install 3rd party yum repo
+	# remi
+		http://rpms.famillecollet.com/
+		http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+	# MySQL
+		http://dev.mysql.com/downloads/repo/yum/
+		http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
+		(If needed) Selecting Mysql release series
+			vim /etc/yum.repos.d/mysql-community.repo
+	# Installation
+		#(Reference only) yum install epel-release-7-5.noarch.rpm remi-release-7.rpm mysql-community-release-el7-5.noarch.rpm
+Perform "yum update"
+(If needed, especially when kernel is updated) Reboot server with "reboot"
+
+---------------------Security---------------------
+
+# (If needed) Adding login banner for local login
+sed -i '1i WARNING: Authorized Users Only' /etc/issue
+
+# (If needed) Adding login banner for telnet
+sed -i '1i WARNING: Authorized Users Only' /etc/issue.net
+
+# (If needed) Adding login banner for SSH
+echo "WARNING: Authorized Users Only" >> /etc/issue.ssh
+vim /etc/ssh/sshd_config
+	# Include the following line
+	Banner /etc/issue.ssh
+systemctl restart sshd
+
+# (If needed) Increase log retention
+sed -i 's/rotate 4/#rotate 4/;/rotate 4/a rotate 13' /etc/logrotate.conf
+
+---------------------Server Management---------------------
+
+# (If needed) Generate new host ID
+genhostid
+
+---------------------Packages---------------------
+
+PHP
+	yum install php
+	# (If needed) Install modules
+	yum install php-mbstring php-mysqlnd php-pdo php-intl
+	# Configure timezone
+	sed -i 's/;date.timezone =/date.timezone = "Asia\/Hong_Kong"/g' /etc/php.ini
+	# (For PHP 5.6, if needed) Disable deprecated always_populate_raw_post_data
+	sed -i 's/;always_populate_raw_post_data = -1/always_populate_raw_post_data = -1/g' /etc/php.ini
+
+Apache HTTP Server
+	# Installed if PHP is installed
+	yum install httpd
+	# Configure ServerName
+	vim /etc/httpd/conf/httpd.conf
+	# Test Apache configuration
+	apachectl configtest
+	# Install SSL support
+	yum install mod_ssl
+	# (If needed) Install SSL support
+	yum install mod_ssl
+
+MySQL
+	yum install mysql-community-server
+	(If needed) yum install mysql-utilities
+	# Configure MySQL
+	vim /etc/my.cnf
+	systemctl is-enabled mysqld
+	systemctl status mysqld
+	systemctl start mysqld
+	# (MySQL 5.7 onwards) Get the temporary password for root
+	grep 'temporary password' /var/log/mysqld.log
+	(If needed) mysql_secure_installation
+
+Server JRE (Includes JDK)
+	# Download Server JRE
+	# http://www.oracle.com/technetwork/java/javase/downloads/index.html
+	mkdir /usr/local/java
+	tar -xzvf server-jre-8u60-linux-x64.tar.gz -C /usr/local/java/
+	ln -s /usr/local/java/jdk1.8.0_60 /usr/local/java/latest
+	ln -s /usr/local/java/latest /usr/local/java/default
+	chown -R root:root /usr/local/java/
+	chcon -R -u system_u -t usr_t /usr/local/java/
+	ln -s /usr/local/java/default/bin/jar /usr/local/bin/jar
+	ln -s /usr/local/java/default/bin/java /usr/local/bin/java
+	ln -s /usr/local/java/default/bin/javac /usr/local/bin/javac
+	chcon -h -u system_u -t bin_t /usr/local/bin/jar
+	chcon -h -u system_u -t bin_t /usr/local/bin/java
+	chcon -h -u system_u -t bin_t /usr/local/bin/javac
+
+ClamAV
+	yum install clamav clamav-update
+	# Perform immediate update
+	/usr/bin/freshclam
+	# Enable automatic update
+	vim /etc/sysconfig/freshclam
+		# Remove line FRESHCLAM_DELAY=disabled-warn

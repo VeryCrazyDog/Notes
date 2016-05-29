@@ -1,0 +1,6 @@
+# Delete remote tag
+git tag -d tag_name
+git push origin :refs/tags/tag_name
+
+# Moving the branch head to previous revision
+git update-ref refs/heads/develop 344e9527d4c263e2c25fc20a29be7913e2b8534e

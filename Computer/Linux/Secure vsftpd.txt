@@ -1,0 +1,3 @@
+# Have the following configuration set
+anonymous_enable=NO
+chroot_local_user=YES

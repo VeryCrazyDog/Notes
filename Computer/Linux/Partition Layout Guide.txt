@@ -1,0 +1,33 @@
+Red Hat Recommended System Swap Space for RHEL 7 (as of 2015-01-09)
+https://access.redhat.com/site/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Installation_Guide/s2-diskpartrecommend-x86.html
+----------------------------------------------------------------------
+Amount of RAM in the system    Recommended swap space         Recommended swap space if allowing for hibernation
+<=2GB                          2 times the amount of RAM      3 times the amount of RAM
+>2GB ¡V 8GB                    Equal to the amount of RAM     2 times the amount of RAM
+>8GB ¡V 64GB                   0.5 times the amount of RAM    1.5 times the amount of RAM
+>64GB                          Workload dependent             Hibernation not recommended
+
+
+
+Red Hat Recommended System Swap Space for RHEL 6 (as of 2015-01-09)
+https://access.redhat.com/site/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Installation_Guide/s2-diskpartrecommend-x86.html
+----------------------------------------------------------------------
+Amount of RAM in the system    Recommended swap space         Recommended swap space if allowing for hibernation
+<=2GB                          2 times the amount of RAM      3 times the amount of RAM
+>2GB ¡V 8GB                    Equal to the amount of RAM     2 times the amount of RAM
+>8GB ¡V 64GB                   At least 4GB                   1.5 times the amount of RAM
+>64GB                          At least 4GB                   Hibernation not recommended
+
+
+
+Partition for 300GB hard disk with 4GB RAM for web and database server, assuming web page and database are located in /var
+----------------------------------------------------------------------
+/boot                     Defaut size
+LVM                       Remaining space
+    /                     Remaining space
+    /home                 20GB
+    /tmp                  8GB
+    /var                  160GB
+    /var/log              2GB
+    /var/log/audit        1GB
+    swap                  Default size or 8GB

@@ -1,0 +1,104 @@
+For CentOS 7, Apache 2.4.6 with PHP 5.6.5
+============================================================
+vim /etc/httpd/conf/httpd.conf
+	# Add the following lines before ServerRoot option
+		#
+		# Don't give away too much information about all the subcomponents
+		# we are running.  Comment out this line if you don't mind remote sites
+		# finding out what major optional modules you are running
+		ServerTokens ProductOnly
+
+		#
+		# Determines the behaviour on HTTP TRACE requests
+		TraceEnable off
+	# Set the Options to None for DocumentRoot
+		<Directory "/var/www/html">
+			Options None
+		</Directory>
+vim /etc/httpd/conf.modules.d/00-base.conf
+	# Comment the following lines
+		#LoadModule autoindex_module modules/mod_autoindex.so
+		#LoadModule userdir_module modules/mod_userdir.so
+sed -i -e 's/^/#/' /etc/httpd/conf.d/autoindex.conf
+apachectl configtest
+
+
+
+For RHEL 6.4, Apache 2.2.15 with PHP 5.4.15
+============================================================
+vim /etc/httpd/conf/httpd.conf
+	# Change the setting ServerTokens
+		ServerTokens Prod
+	# Comment the following lines
+		#LoadModule include_module modules/mod_include.so
+		#LoadModule env_module modules/mod_env.so
+		#LoadModule status_module modules/mod_status.so
+		#LoadModule autoindex_module modules/mod_autoindex.so
+		#LoadModule negotiation_module modules/mod_negotiation.so
+		#LoadModule actions_module modules/mod_actions.so
+		#LoadModule userdir_module modules/mod_userdir.so
+		#LoadModule alias_module modules/mod_alias.so
+		#LoadModule cgi_module modules/mod_cgi.so
+		#LoadModule version_module modules/mod_version.so
+		#Alias /icons/ "/var/www/icons/"
+		#<Directory "/var/www/icons">
+		#    Options Indexes MultiViews FollowSymLinks
+		#    AllowOverride None
+		#    Order allow,deny
+		#    Allow from all
+		#</Directory>
+		#ScriptAlias /cgi-bin/ "/var/www/cgi-bin/"
+		#<Directory "/var/www/cgi-bin">
+		#    AllowOverride None
+		#    Options None
+		#    Order allow,deny
+		#    Allow from all
+		#</Directory>
+		#IndexOptions FancyIndexing VersionSort NameWidth=* HTMLTable Charset=UTF-8
+		#AddIconByEncoding (CMP,/icons/compressed.gif) x-compress x-gzip
+		#AddIconByType (TXT,/icons/text.gif) text/*
+		#AddIconByType (IMG,/icons/image2.gif) image/*
+		#AddIconByType (SND,/icons/sound2.gif) audio/*
+		#AddIconByType (VID,/icons/movie.gif) video/*
+		#AddIcon /icons/binary.gif .bin .exe
+		#AddIcon /icons/binhex.gif .hqx
+		#AddIcon /icons/tar.gif .tar
+		#AddIcon /icons/world2.gif .wrl .wrl.gz .vrml .vrm .iv
+		#AddIcon /icons/compressed.gif .Z .z .tgz .gz .zip
+		#AddIcon /icons/a.gif .ps .ai .eps
+		#AddIcon /icons/layout.gif .html .shtml .htm .pdf
+		#AddIcon /icons/text.gif .txt
+		#AddIcon /icons/c.gif .c
+		#AddIcon /icons/p.gif .pl .py
+		#AddIcon /icons/f.gif .for
+		#AddIcon /icons/dvi.gif .dvi
+		#AddIcon /icons/uuencoded.gif .uu
+		#AddIcon /icons/script.gif .conf .sh .shar .csh .ksh .tcl
+		#AddIcon /icons/tex.gif .tex
+		#AddIcon /icons/bomb.gif core
+		#AddIcon /icons/back.gif ..
+		#AddIcon /icons/hand.right.gif README
+		#AddIcon /icons/folder.gif ^^DIRECTORY^^
+		#AddIcon /icons/blank.gif ^^BLANKICON^^
+		#DefaultIcon /icons/unknown.gif
+		#ReadmeName README.html
+		#HeaderName HEADER.html
+		#IndexIgnore .??* *~ *# HEADER* README* RCS CVS *,v *,t
+		#LanguagePriority en ca cs da de el eo es et fr he hr it ja ko ltz nl nn no pl pt pt-BR ru sv zh-CN zh-TW
+		#ForceLanguagePriority Prefer Fallback
+		#Alias /error/ "/var/www/error/"
+	# Replace the directive for root directory to follow
+		<Directory />
+		    Options None
+		    Order deny,allow
+		    Deny from all
+		    AllowOverride None
+		</Directory>
+	# Replace the directive for DocumentRoot to follow
+		<Directory "/var/www/html">
+		    Options None
+		    AllowOverride None
+		    Order allow,deny
+		    Allow from all
+		</Directory>
+apachectl configtest
