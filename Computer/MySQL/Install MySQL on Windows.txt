@@ -1,0 +1,22 @@
+Install from noinstall ZIP file (Reference: 5.5.29)
+===========================================================
+Download the binary ZIP file (EG. mysql-5.5.29-winx64.zip)
+
+Unzip the files to installation location such as d:\mysql55
+
+Prepare option file my.ini
+
+Start MySQL in console mode
+	d:\mysql55\bin\mysqld.exe --console
+
+Install MySQL as service
+	d:\mysql55\bin\mysqld.exe --install
+
+Install MySQL as service with customized service name
+	d:\mysql55\bin\mysqld.exe --install "service_name"
+
+Remove MySQL as service
+	d:\mysql55\bin\mysqld.exe --remove
+
+Remove MySQL as service with service name
+	d:\mysql55\bin\mysqld.exe --remove "service_name"

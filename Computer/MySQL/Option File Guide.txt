@@ -1,0 +1,30 @@
+[mysqld]
+# Make the slave read-only
+read-only=true
+# Required unique id between 1 and 2^32 - 1
+server-id=0
+# The host name or IP address of the slave to be reported to the master during slave registration
+report-host=host
+# Set default character set to UTF8
+character-set-server=utf8
+# Skip reverse DNS lookup to avoid service interruption due to DNS down
+skip-name-resolve
+# Disabling symbolic-links is recommended to prevent assorted security risks (either one below)
+skip-symbolic-links
+symbolic-links=0
+# The setting of this variable determines whether the slave logs master status and connection information to a FILE or to a TABLE
+master-info-repository=TABLE
+# This option causes the server to log its relay log info to a file or a table
+relay-log-info-repository=TABLE
+# Enable binary logging or not
+log-bin
+# Whether updates received by a slave server from a master server should be logged to the slave's own binary log
+log-slave-updates=ON
+# This variable sets the binary logging format, and can be any one of STATEMENT, ROW, or MIXED
+binlog-format=MIXED
+# When enabled, this option enforces GTID consistency by allowing execution of only those statements that can be logged in a transactionally safe manner
+enforce-gtid-consistency=true
+# This option specifies whether global transaction identifiers (GTIDs) are used to identify transactions
+gtid-mode=ON
+# Set automatic binary log file removal
+expire_logs_days=90

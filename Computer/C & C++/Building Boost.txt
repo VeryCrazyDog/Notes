@@ -1,0 +1,12 @@
+rem Command for building Boost C++ libraries
+rem Website: http://www.boost.org/
+
+rem Build x86 library
+bootstrap
+.\b2
+.\b2 runtime-link=static
+
+rem Build x64 library
+bootstrap
+.\b2 address-model=64
+.\b2 address-model=64 runtime-link=static
