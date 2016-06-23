@@ -1,0 +1,48 @@
+Dump data from old database and transfer file
+------------------------------------------------------------
+# Stop all access to old database if possible
+
+# On slave database if any, or master database, lock the database
+FLUSH TABLES WITH READ LOCK;
+
+# Dump the structure and data to file
+# (Example 1) mysqldump -p petdb > petdb.sql
+# (Example 2) mysqldump -p petdb blacklist > blacklist.sql
+# (Example 3) mysqldump -p petdb --no-data > dump-defs-petdb.sql
+# (Example 3) mysqldump -p petdb --no-create-info > dump-data-petdb.sql
+
+# Unlock the database
+UNLOCK TABLES;
+
+# Stop the old database
+# (Example 1) service mysqld stop
+# (Example 2) service mysql stop
+
+# Zip the file before transfer
+tar czvf dump.tar.gz *.sql
+
+# Transfer the data to new database
+# (Example) scp dump.tar.gz root@new-server:/root
+
+
+
+Import data to new database
+------------------------------------------------------------
+# (If needed) Configure mysql configuration file my.cnf
+# (If needed) Clear all previous data on new database
+
+# (If needed) Create database users
+
+# (If needed) Create database
+
+# Import data to new database
+# (Example 1) mysql < petdb.sql
+# (Example 2) mysql cpsdb < blacklist.sql
+# (Example 3) mysql cpsdb < dump-defs-petdb.sql
+# (Example 3) mysql cpsdb < pdump-data-petdb.sql
+
+# Set up the security of database such as set up root password
+mysql_secure_installation
+
+# Flush privileges if it has not been done
+FLUSH PRIVILEGES;
