@@ -1,4 +1,17 @@
-# Data selection technique
+# Debugging
+Enable unlimited buffer size for DBMS output
+```sql
+DBMS_OUTPUT.ENABLE(NULL);
+```
+
+Print line to DBMS output, please remember to open DBMS output view for viewing the message
+```sql
+DBMS_OUTPUT.PUT_LINE('Hello World!');
+```
+
+
+
+# Data Selection Technique
 
 Select a delimitered list
 ```sql
@@ -23,7 +36,9 @@ SELECT REGEXP_REPLACE(XMLAGG(XMLELEMENT(
 FROM (SELECT * FROM DUAL UNION ALL SELECT * FROM DUAL);
 ```
 
-# Retrieving  database schema
+
+
+# Retrieving Database Information
 
 Find table primary key and their respective columns
 ```sql
@@ -36,8 +51,35 @@ ORDER BY CONS.OWNER, COLS.TABLE_NAME, COLS.POSITION;
 
 Find table indexes and their respective columns
 ```sql
-SELECT IDXS.OWNER, COLS.TABLE_NAME, IDXS.INDEX_NAME, IDXS.UNIQUENESS, COLS.COLUMN_NAME, COLS.COLUMN_POSITION, COLS.DESCEND
-FROM ALL_INDEXES IDXS INNER JOIN ALL_IND_COLUMNS COLS ON IDXS.OWNER = COLS.INDEX_OWNER AND IDXS.INDEX_NAME = COLS.INDEX_NAME
+SELECT
+	IDXS.OWNER,
+	COLS.TABLE_NAME,
+	IDXS.INDEX_NAME,
+	IDXS.UNIQUENESS,
+	COLS.COLUMN_NAME,
+	COLS.COLUMN_POSITION,
+	COLS.DESCEND
+FROM ALL_INDEXES IDXS INNER JOIN ALL_IND_COLUMNS COLS
+	ON IDXS.OWNER = COLS.INDEX_OWNER AND IDXS.INDEX_NAME = COLS.INDEX_NAME
 WHERE IDXS.OWNER = USER AND COLS.TABLE_NAME LIKE UPPER('%')
 ORDER BY IDXS.OWNER, COLS.TABLE_NAME, IDXS.INDEX_NAME, COLS.COLUMN_POSITION;
+```
+
+Find overall database size and tablespaces free space
+```sql
+COLUMN "Database Size" FORMAT A20;
+COLUMN "Free Space" FORMAT A20;
+SELECT
+	ROUND(SUM(USED.BYTES) / (1024 * 1024 * 1024) ) || ' GB' "Database Size",
+	ROUND(FREE.P / (1024 * 1024 * 1024)) || ' GB' "Free Space"
+FROM (
+	SELECT BYTES FROM V$DATAFILE
+	UNION ALL
+	SELECT BYTES FROM V$TEMPFILE
+	UNION ALL
+	SELECT BYTES FROM V$LOG
+) USED, (
+	SELECT SUM(BYTES) AS P FROM DBA_FREE_SPACE
+) FREE
+GROUP BY FREE.P;
 ```
