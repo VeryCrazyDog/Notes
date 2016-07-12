@@ -1,4 +1,5 @@
 # Debugging
+
 Enable unlimited buffer size for DBMS output
 ```sql
 DBMS_OUTPUT.ENABLE(NULL);
@@ -67,8 +68,6 @@ ORDER BY IDXS.OWNER, COLS.TABLE_NAME, IDXS.INDEX_NAME, COLS.COLUMN_POSITION;
 
 Find overall database size and tablespaces free space
 ```sql
-COLUMN "Database Size" FORMAT A20;
-COLUMN "Free Space" FORMAT A20;
 SELECT
 	ROUND(SUM(USED.BYTES) / (1024 * 1024 * 1024) ) || ' GB' "Database Size",
 	ROUND(FREE.P / (1024 * 1024 * 1024)) || ' GB' "Free Space"
@@ -82,4 +81,26 @@ FROM (
 	SELECT SUM(BYTES) AS P FROM DBA_FREE_SPACE
 ) FREE
 GROUP BY FREE.P;
+```
+
+Find locked objects and their respective session
+```sql
+SELECT A.INST_ID, A.SESSION_ID, B."SERIAL#", B.STATUS, A.ORACLE_USERNAME, A.OS_USER_NAME, A.PROCESS, C.NAME, B.MACHINE
+FROM GV$LOCKED_OBJECT A
+	INNER JOIN GV$SESSION B ON A.SESSION_ID = B.SID
+	INNER JOIN SYS.OBJ$ C ON A.OBJECT_ID = C."OBJ#";
+```
+
+
+
+# Operation on Database
+
+Mark DBMS JOB with JOB ID `777` as broken
+```sql
+DBMS_JOB.BROKEN(777, TRUE);
+```
+
+Kill session with session ID `SESSION_ID` equal to `777` and serial number `SERIAL#` equal to `1234` immediately
+```sql
+ALTER SYSTEM KILL SESSION '777, 1234' IMMEDIATE;
 ```
