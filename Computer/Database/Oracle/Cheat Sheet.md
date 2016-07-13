@@ -17,24 +17,16 @@ DBMS_OUTPUT.PUT_LINE('Hello World!');
 Select a delimitered list
 ```sql
 -- For string less than or equal to 4000 bytes
-SELECT LISTAGG (DUMMY, ', ' ) WITHIN GROUP (ORDER BY DUMMY) AS RESULT
-FROM (SELECT * FROM DUAL UNION ALL SELECT * FROM DUAL);
+SELECT LISTAGG(DUMMY, ' AND ') WITHIN GROUP (ORDER BY ID) AS RESULT
+FROM (SELECT 1 AS ID, 'Y' AS DUMMY FROM DUAL UNION ALL SELECT 2, 'X' FROM DUAL);
 
--- For string larger than 4000 bytes and can use RTRIM
-SELECT RTRIM(XMLAGG(XMLELEMENT(
-	E,
-	DUMMY,
-	', '
-).EXTRACT('//text()') ORDER BY DUMMY).GetClobVal(), ', ') AS RESULT
-FROM (SELECT * FROM DUAL UNION ALL SELECT * FROM DUAL);
-
--- For string larger than 4000 bytes and cannot use RTRIM
+-- For string larger than 4000 bytes
 SELECT REGEXP_REPLACE(XMLAGG(XMLELEMENT(
 	E,
 	DUMMY,
 	' AND '
-).EXTRACT('//text()') ORDER BY DUMMY).GetClobVal(), ' AND $', '') AS RESULT
-FROM (SELECT * FROM DUAL UNION ALL SELECT * FROM DUAL);
+) ORDER BY ID).EXTRACT('//text()').GetClobVal(), ' AND $', '') AS RESULT
+FROM (SELECT 1 AS ID, 'Y' AS DUMMY FROM DUAL UNION ALL SELECT 2, 'X' FROM DUAL);
 ```
 
 
