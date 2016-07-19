@@ -5,3 +5,13 @@ if [ "$(id -u)" != "0" ]; then
 	exit 1
 fi
 ```
+
+Create a file with timestamp as part of the filename
+```sh
+touch test_file_$(date +'%Y%m%d%H%M%S')
+```
+
+Case sensitive replace of string `foo` with `bar` in file `filename.txt`
+```sh
+sed -i -e 's/foo/bar/g' filename.txt
+```
