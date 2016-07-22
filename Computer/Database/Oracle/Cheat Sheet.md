@@ -1,11 +1,13 @@
 # Debugging
 
 Enable unlimited buffer size for DBMS output
+
 ```sql
 DBMS_OUTPUT.ENABLE(NULL);
 ```
 
 Print line to DBMS output, please remember to open DBMS output view for viewing the message
+
 ```sql
 DBMS_OUTPUT.PUT_LINE('Hello World!');
 ```
@@ -15,6 +17,7 @@ DBMS_OUTPUT.PUT_LINE('Hello World!');
 # Data Selection Technique
 
 Select a delimitered list
+
 ```sql
 -- For string less than or equal to 4000 bytes
 SELECT LISTAGG(DUMMY, ' AND ') WITHIN GROUP (ORDER BY ID) AS RESULT
@@ -34,6 +37,7 @@ FROM (SELECT 1 AS ID, 'Y' AS DUMMY FROM DUAL UNION ALL SELECT 2, 'X' FROM DUAL);
 # Retrieving Database Information
 
 Find table primary key and their respective columns
+
 ```sql
 SELECT CONS.OWNER, CONS.STATUS, COLS.TABLE_NAME, COLS.COLUMN_NAME, COLS.POSITION
 FROM ALL_CONSTRAINTS CONS INNER JOIN ALL_CONS_COLUMNS COLS
@@ -43,6 +47,7 @@ ORDER BY CONS.OWNER, COLS.TABLE_NAME, COLS.POSITION;
 ```
 
 Find table indexes and their respective columns
+
 ```sql
 SELECT
 	IDXS.OWNER,
@@ -59,6 +64,7 @@ ORDER BY IDXS.OWNER, COLS.TABLE_NAME, IDXS.INDEX_NAME, COLS.COLUMN_POSITION;
 ```
 
 Find overall database size and tablespaces free space
+
 ```sql
 SELECT
 	ROUND(SUM(USED.BYTES) / (1024 * 1024 * 1024) ) || ' GB' "Database Size",
@@ -76,6 +82,7 @@ GROUP BY FREE.P;
 ```
 
 Find locked objects and their respective session
+
 ```sql
 SELECT A.INST_ID, A.SESSION_ID, B."SERIAL#", B.STATUS, A.ORACLE_USERNAME, A.OS_USER_NAME, A.PROCESS, C.NAME, B.MACHINE
 FROM GV$LOCKED_OBJECT A
@@ -88,11 +95,13 @@ FROM GV$LOCKED_OBJECT A
 # Operation on Database
 
 Mark DBMS JOB with JOB ID `777` as broken
+
 ```sql
 DBMS_JOB.BROKEN(777, TRUE);
 ```
 
 Kill session with session ID `SESSION_ID` equal to `777` and serial number `SERIAL#` equal to `1234` immediately
+
 ```sql
 ALTER SYSTEM KILL SESSION '777, 1234' IMMEDIATE;
 ```
