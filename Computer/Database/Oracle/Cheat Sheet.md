@@ -36,6 +36,8 @@ FROM (SELECT 1 AS ID, 'Y' AS DUMMY FROM DUAL UNION ALL SELECT 2, 'X' FROM DUAL);
 
 # Retrieving Database Information
 
+## Schema Information
+
 Find table primary key and their respective columns
 
 ```sql
@@ -63,23 +65,58 @@ WHERE IDXS.OWNER = USER AND COLS.TABLE_NAME LIKE UPPER('%')
 ORDER BY IDXS.OWNER, COLS.TABLE_NAME, IDXS.INDEX_NAME, COLS.COLUMN_POSITION;
 ```
 
-Find overall database size and tablespaces free space
+## Data Size Information
+
+Find overall database file size and tablespaces free space, please notice that the
+actual data size is `data_file - free_space`
+
+```sql
+SELECT data_file, temp_file, log_file, free_space
+FROM (
+	SELECT
+		name,
+		REGEXP_REPLACE(TO_CHAR(ROUND(bytes / 1024 / 1024 / 1024, 2)), '^\.', '0.') || ' GB' gigabytes
+	FROM (
+		SELECT 'Data File' AS name, SUM(bytes) AS bytes FROM V$DATAFILE
+		UNION ALL
+		SELECT 'Temp File', SUM(bytes) FROM V$TEMPFILE
+		UNION ALL
+		SELECT 'Log File', SUM(bytes) FROM V$LOG
+		UNION ALL
+		SELECT 'Free Space', SUM(bytes) FROM dba_free_space
+	)
+)
+PIVOT (
+	MAX(gigabytes)
+	FOR name IN ('Data File' AS data_file, 'Temp File' AS temp_file, 'Log File' AS log_file, 'Free Space' AS free_space)
+);
+```
+
+Display a list of segments (table, index, etc) under the current owner order by data size
 
 ```sql
 SELECT
-	ROUND(SUM(USED.BYTES) / (1024 * 1024 * 1024) ) || ' GB' "Database Size",
-	ROUND(FREE.P / (1024 * 1024 * 1024)) || ' GB' "Free Space"
-FROM (
-	SELECT BYTES FROM V$DATAFILE
-	UNION ALL
-	SELECT BYTES FROM V$TEMPFILE
-	UNION ALL
-	SELECT BYTES FROM V$LOG
-) USED, (
-	SELECT SUM(BYTES) AS P FROM DBA_FREE_SPACE
-) FREE
-GROUP BY FREE.P;
+	owner,
+	segment_name,
+	segment_type,
+	REGEXP_REPLACE(TO_CHAR(ROUND(bytes / 1024 / 1024 / 1024, 2)), '^\.', '0.') || ' GB' gigabytes
+FROM dba_segments
+WHERE owner = USER
+ORDER BY bytes DESC;
 ```
+
+Display a list of owners order by data size
+
+```sql
+SELECT
+	owner,
+	REGEXP_REPLACE(TO_CHAR(ROUND(SUM(bytes) / 1024 / 1024 / 1024, 2)), '^\.', '0.') || ' GB' gigabytes
+FROM dba_segments
+GROUP BY owner
+ORDER BY gigabytes DESC;
+```
+
+## Session Information
 
 Find locked objects and their respective session
 
