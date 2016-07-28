@@ -75,7 +75,7 @@ SELECT data_file, temp_file, log_file, free_space
 FROM (
 	SELECT
 		name,
-		REGEXP_REPLACE(TO_CHAR(ROUND(bytes / 1024 / 1024 / 1024, 2)), '^\.', '0.') || ' GB' gigabytes
+		ROUND(bytes / 1024 / 1024 / 1024, 2) gigabytes
 	FROM (
 		SELECT 'Data File' AS name, SUM(bytes) AS bytes FROM V$DATAFILE
 		UNION ALL
@@ -99,7 +99,7 @@ SELECT
 	owner,
 	segment_name,
 	segment_type,
-	REGEXP_REPLACE(TO_CHAR(ROUND(bytes / 1024 / 1024 / 1024, 2)), '^\.', '0.') || ' GB' gigabytes
+	ROUND(bytes / 1024 / 1024 / 1024, 2) gigabytes
 FROM dba_segments
 WHERE owner = USER
 ORDER BY bytes DESC;
@@ -110,7 +110,7 @@ Display a list of owners order by data size
 ```sql
 SELECT
 	owner,
-	REGEXP_REPLACE(TO_CHAR(ROUND(SUM(bytes) / 1024 / 1024 / 1024, 2)), '^\.', '0.') || ' GB' gigabytes
+	ROUND(SUM(bytes) / 1024 / 1024 / 1024, 2) gigabytes
 FROM dba_segments
 GROUP BY owner
 ORDER BY gigabytes DESC;
