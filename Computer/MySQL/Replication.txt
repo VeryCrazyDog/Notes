@@ -1,4 +1,71 @@
 # ------------------------------------------------------------------------------
+# Set up GTID based replication for MySQL 5.7.12
+# ------------------------------------------------------------------------------
+
+# On all servers, ensure option file includes the following options
+# Refer to Option File Guide for more information
+# TODO Update the option name
+[mysqld]
+super_read_only=true
+server-id=1
+log-bin
+binlog-format=MIXED
+enforce-gtid-consistency=true
+gtid-mode=ON
+
+# On master server, make sure an account for replication has been created
+CREATE USER 'repl' IDENTIFIED BY 'temp_P@ssw0rd';
+# Grant replication privilege
+GRANT REPLICATION SLAVE ON *.* TO 'repl';
+# (If necessary) Grant additional privilege to enable mysqlrplshow to run correctly
+GRANT REPLICATION CLIENT ON *.* TO 'repl'@'%';
+# Check granted privilege
+SHOW GRANTS FOR 'repl'@'%';
+
+# On any server in the replication chain, dump the database
+# TODO Check if we should include "SET @@GLOBAL.GTID_PURGED" in the dump file
+mysqldump -u root -p --all-databases --master-data ¡V-set-gtid-purged=OFF > `hostname`.sql
+
+# Transfer the dump file to new slave
+gzip `hostname`.sql
+scp `hostname`.sql.gz slave_host:/root
+# Delete the database dump
+rm -i `hostname`.sql.gz
+
+# On slave server, reinitialize MySQL
+systemctl stop mysqld
+rm -r /var/lib/mysql
+systemctl start mysqld
+grep 'temporary password' /var/log/mysqld.log
+mysql -u root -p
+	SET GLOBAL super_read_only=0;
+mysql_secure_installation
+
+# Unzip and import the dump data
+gunzip master_hostname.sql.gz
+mysql < master_hostname.sql
+
+# Login to MySQL
+mysql -u root -p
+
+# After log in to MySQL, execute the following
+# Reset master to clear all executed transaction
+RESET MASTER;
+SHOW MASTER STATUS;
+SHOW GLOBAL VARIABLES LIKE 'gtid%';
+# Expected to generate 2 warnings using below SQL
+# TODO Find a solution to prevent the warning, reference https://dev.mysql.com/doc/refman/5.7/en/start-slave.html
+CHANGE MASTER TO MASTER_HOST='master_host', MASTER_USER='repl', MASTER_PASSWORD='password', MASTER_AUTO_POSITION=1;
+SHOW SLAVE STATUS\G
+START SLAVE;
+SHOW SLAVE STATUS\G
+
+# Restart MySQL to enable new privilege and re-enable super_read_only
+systemctl restart mysqld
+# Delete the database dump
+rm -i master_hostname.sql
+
+# ------------------------------------------------------------------------------
 # Set up GTID based replication for MySQL 5.6.24
 # ------------------------------------------------------------------------------
 
@@ -16,7 +83,7 @@ expire_logs_days=90
 
 # On master server, make sure an account for replication has been created
 GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%' IDENTIFIED BY 'password';
-# (If neccessary) Grant additional privilege to enable mysqlrplshow to run correctly
+# (If necessary) Grant additional privilege to enable mysqlrplshow to run correctly
 GRANT REPLICATION CLIENT ON *.* TO 'repl'@'%';
 # Check granted privilege
 SHOW GRANTS FOR 'repl'@'%';
@@ -28,13 +95,13 @@ mysqldump -u root -p --all-databases --single-transaction --triggers --routines 
 gzip `hostname`.sql
 scp `hostname`.sql.gz slave_host:/root
 
-# (If neccessary) Remove MySQL data directory
+# (If necessary) Remove MySQL data directory
 systemctl stop mysqld
 rm -r /var/lib/mysql
 systemctl start mysqld
 
 # On slave server, unzip and import the dump data
-unzip master_hostname.sql.gz
+gunzip master_hostname.sql.gz
 mysql < master_hostname.sql
 # Restart MySQL to enable new privilege as FLUSH PRIVILEGES will produce one transaction
 systemctl restart mysqld

@@ -1,0 +1,45 @@
+--------------------------------------------------------------------------------
+CentOS 7, PHP 7.0
+--------------------------------------------------------------------------------
+yum install php
+# (If needed) Install modules
+yum install php-intl php-mbstring php-mysqlnd php-pdo
+# Configure timezone
+mkbak /etc/php.ini
+sed -i 's/;date.timezone =/date.timezone = "Asia\/Hong_Kong"/g' /etc/php.ini
+grep timezone /etc/php.ini
+
+--------------------------------------------------------------------------------
+CentOS 7, PHP 5.6
+--------------------------------------------------------------------------------
+yum install php
+# (If needed) Install modules
+yum install php-mbstring php-mysqlnd php-pdo php-intl
+# Configure timezone
+sed -i 's/;date.timezone =/date.timezone = "Asia\/Hong_Kong"/g' /etc/php.ini
+# (If needed) Disable deprecated always_populate_raw_post_data
+sed -i 's/;always_populate_raw_post_data = -1/always_populate_raw_post_data = -1/g' /etc/php.ini
+
+--------------------------------------------------------------------------------
+Windows, PHP 5.4.11 with Apache
+--------------------------------------------------------------------------------
+Download the binary ZIP file (EG. php-5.4.11-Win32-VC9-x86.zip)
+
+Make sure Visual C++ 2008 Runtime has been installed if the PHP binary is compiled with VC9 compiled
+
+Unzip the files to installation location such as d:\php54
+
+Prepare php.ini file by copying the chosen template (php.ini-development or php.ini-production) to new name php.ini
+
+If necessary, edit the php.ini to load PHP extensions
+	Set the extension directory. Full path is needed if Apache HTTP Server will link against the PHP
+		extension_dir = "d:\php54\ext"
+	Uncomment the PHP extensions that will be used, EG:
+		extension=php_mbstring.dll
+		extension=php_mysqli.dll
+
+Check if the modules can be loaded without Apache HTTP Server
+	D:\php54\php.exe -m
+
+After Apache HTTP Server has been linked with PHP, create a HTML page to dump the phpinfo()
+	<?php phpinfo(); ?>

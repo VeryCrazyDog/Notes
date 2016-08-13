@@ -1,0 +1,40 @@
+--------------------------------------------------------------------------------
+CentOS 7, MySQL 5.7
+--------------------------------------------------------------------------------
+yum install mysql-community-server
+# (If needed) Install ODBC
+yum install mysql-connector-odbc
+# (If needed) Install utilities
+yum install mysql-utilities
+# Configure MySQL
+vim /etc/my.cnf
+systemctl enable mysqld
+systemctl start mysqld
+# (MySQL 5.7 onwards) Get the temporary password for root
+grep 'temporary password' /var/log/mysqld.log
+# (If needed) Secure installation
+mysql_secure_installation
+
+--------------------------------------------------------------------------------
+Windows, MySQL 5.5.29, Install from noinstall ZIP file
+--------------------------------------------------------------------------------
+Download the binary ZIP file (EG. mysql-5.5.29-winx64.zip)
+
+Unzip the files to installation location such as d:\mysql55
+
+Prepare option file my.ini
+
+Start MySQL in console mode
+	d:\mysql55\bin\mysqld.exe --console
+
+Install MySQL as service
+	d:\mysql55\bin\mysqld.exe --install
+
+Install MySQL as service with customized service name
+	d:\mysql55\bin\mysqld.exe --install "service_name"
+
+Remove MySQL as service
+	d:\mysql55\bin\mysqld.exe --remove
+
+Remove MySQL as service with service name
+	d:\mysql55\bin\mysqld.exe --remove "service_name"

@@ -52,7 +52,7 @@ SET GLOBAL SQL_SLAVE_SKIP_COUNTER = 1;
 START SLAVE;
 
 #-----------------------------------------
-# Replication related
+# Export related
 #-----------------------------------------
 
 # Dump SQL query data into tab-separated file
