@@ -1,0 +1,174 @@
+#!/bin/bash
+#
+# tomcat        Startup script for the Apache Tomcat
+#
+# chkconfig: - 85 15
+# description: Apache Tomcat is the servlet container that is used  \
+#              in the official reference implementation for the  \
+#              Java Servlet and JavaServer Pages technologies.
+# processname: jsvc
+# pidfile: $CATALINA_BASE/logs/catalina-daemon.pid
+
+# Source function library
+. /etc/rc.d/init.d/functions
+
+# Configuration
+TOMCAT_USER=tomcat
+JAVA_HOME=/usr/java/jdk1.7.0_09
+# Files in CATALINA_BASE will be used first
+CATALINA_BASE=/home/tomcat/tomcat_base
+# Path to the installed Tomcat
+CATALINA_HOME=/usr/share/tomcat/apache-tomcat-7.0.32
+
+# Shortform for message
+DAEMON_SCRIPT=$CATALINA_HOME/bin/daemon.sh
+JSVC=$CATALINA_BASE/bin/jsvc
+INIT_SCRIPT_DIR=$CATALINA_BASE/bin/tomcat.d
+PROG=tomcat
+PIDFILE=$CATALINA_BASE/logs/catalina-daemon.pid
+RETVAL=0
+
+check_root() {
+    if [ $EUID != 0 ]; then
+        echo "Please run the command again using root account"
+        RETVAL=4
+        exit $RETVAL
+    fi
+}
+
+echo_status() {
+    if [ $RETVAL = 0 ]; then
+        echo_success
+    else
+        echo_failure
+    fi
+}
+
+init_folder() {
+    if [ ! -d ${INIT_SCRIPT_DIR} ]; then
+        /bin/mkdir -p ${INIT_SCRIPT_DIR}
+        chown $TOMCAT_USER.$TOMCAT_USER ${INIT_SCRIPT_DIR}
+    fi
+}
+
+run_script() {
+    for i in ${INIT_SCRIPT_DIR}/*-$1.sh ; do
+        if [ -r "$i" ]; then
+            echo $"Executing extra $1 script: $i"
+            . "$i"
+        fi
+    done
+    unset i
+}
+
+load_pid() {
+    local pid_file=$1
+
+    PID=
+    if [ -f "$pid_file" ] ; then
+        local line p
+
+        [ ! -r "$pid_file" ] && return 4 # "user had insufficient privilege"
+        while : ; do
+            read line
+            [ -z "$line" ] && break
+            for p in $line ; do
+                [ -z "${p//[0-9]/}" -a -d "/proc/$p" ] && PID="$PID $p"
+            done
+        done < "$pid_file"
+
+        if [ -n "$PID" ]; then
+            return 0
+        fi
+        return 1 # "Program is dead but file exists"
+    fi
+    return 3 # "PID file not found"
+}
+
+get_gpid() {
+    load_pid ${PIDFILE}
+    RC=$?
+    if [ -n "$PID" ] ; then
+        local FIRST_PID
+        FIRST_PID=`echo "${PID}" | awk {'print $1'}`
+        GPID=`ps -aef | grep -v grep | grep $FIRST_PID | awk {'print $3'}`
+    else
+        GPID=
+    fi
+}
+
+start() {
+    check_root
+    echo -n $"Starting $PROG: "
+    $DAEMON_SCRIPT --java-home ${JAVA_HOME} --catalina-home ${CATALINA_HOME} --catalina-base ${CATALINA_BASE} --catalina-pid ${PIDFILE} --tomcat-user $TOMCAT_USER start
+    RETVAL=$?
+    echo_status
+    echo
+    if [ -f ${PIDFILE} ]; then
+        chmod 644 ${PIDFILE}
+    fi
+    if [ $RETVAL = 0 ]; then
+        init_folder
+        run_script "startup"
+    fi
+    return $RETVAL
+}
+
+stop() {
+    check_root
+    init_folder
+    run_script "shutdown"
+    echo -n $"Stopping $PROG: "
+    $DAEMON_SCRIPT --java-home ${JAVA_HOME} --catalina-home ${CATALINA_HOME} --catalina-base ${CATALINA_BASE} --catalina-pid ${PIDFILE} --tomcat-user $TOMCAT_USER stop
+    RETVAL=$?
+    echo_status
+    echo
+    if [ $RETVAL != 0 ]; then
+        if [ -f ${PIDFILE} ]; then
+            echo -n $"Killing $PROG: "
+            get_gpid
+            if [ -n "$GPID" ]; then
+                kill -KILL -${GPID}
+                RETVAL=$?
+            else
+                RETVAL=5
+            fi
+            if [ $RETVAL = 0 ]; then
+                rm -f ${PIDFILE}
+            fi
+            echo_status
+            echo
+        fi
+    fi
+}
+
+version() {
+    check_root
+    $DAEMON_SCRIPT --java-home ${JAVA_HOME} --catalina-home ${CATALINA_HOME} --catalina-base ${CATALINA_BASE} --catalina-pid ${PIDFILE} --tomcat-user $TOMCAT_USER version
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        sleep 1
+        start
+        ;;
+    status)
+        status -p ${PIDFILE} $JSVC
+        RETVAL=$?
+        ;;
+    version)
+        version
+        ;;
+    *)
+        echo $"Usage: $prog {start|stop|restart|status|version}"
+        RETVAL=2
+esac
+
+exit $RETVAL

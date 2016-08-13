@@ -1,0 +1,129 @@
+Note: Please execute the below command under root
+
+------------------------------------------------------
+Install Java Development Kit (JDK) Standard Edition
+------------------------------------------------------
+
+# Install the downloaded RPM version of JDK
+chmod u+x jdk-xuxx-linux-x64-rpm.bin
+./jdk-xuxx-linux-x64-rpm.bin
+
+------------------------------------------------------
+Unzip Apache Tomcat
+------------------------------------------------------
+
+# Create a directory for Apache Tomcat
+mkdir /usr/share/tomcat
+
+# Unzip the tar.gz version of Apache Tomcat
+tar xzvf apache-tomcat-x.xx.xx.tar.gz -C /usr/share/tomcat
+
+------------------------------------------------------
+Creating required groups and users
+------------------------------------------------------
+
+# Check if required group is created or not
+grep tomcat /etc/group
+
+# Create required group if not exist
+groupadd -r tomcat
+
+# Check if required user is created or not
+id tomcat
+
+# Create required user if not exist
+useradd -r -g tomcat -m -s /sbin/nologin -c "Apache Tomcat" tomcat
+
+------------------------------------------------------
+Set up necessary directories
+------------------------------------------------------
+
+# Create neccessary directory for Apache Tomcat
+mkdir /home/tomcat/tomcat_base
+mkdir /home/tomcat/tomcat_base/bin
+mkdir /home/tomcat/tomcat_base/bin/tomcat.d
+mkdir /home/tomcat/tomcat_base/conf
+mkdir /home/tomcat/tomcat_base/lib
+mkdir /home/tomcat/tomcat_base/logs
+mkdir /home/tomcat/tomcat_base/temp
+mkdir /home/tomcat/tomcat_base/webapps
+mkdir /home/tomcat/tomcat_base/work
+
+------------------------------------------------------
+Copy neccessary files
+------------------------------------------------------
+
+# Copy configuration files
+cp /usr/share/tomcat/apache-tomcat-x.xx.xx/conf/server.xml /home/tomcat/tomcat_base/conf
+cp /usr/share/tomcat/apache-tomcat-x.xx.xx/conf/web.xml /home/tomcat/tomcat_base/conf
+
+------------------------------------------------------
+Compile and install jsvc Tools
+------------------------------------------------------
+
+# Change the directory
+cd /home/tomcat/tomcat_base/bin
+
+# Copy the jsvc source code
+cp /usr/share/tomcat/apache-tomcat-x.xx.xx/bin/commons-daemon-native.tar.gz .
+
+# Unzip the source code
+tar xvfz commons-daemon-native.tar.gz
+
+# Change to the folder for Unix
+cd commons-daemon-1.0.x-native-src/unix
+
+# Compile the source code
+./configure --with-java=/usr/java/jdkx.x.x_xx
+make
+
+# Copy the compiled binary
+cp jsvc ../..
+
+------------------------------------------------------
+Set up necessary access right
+------------------------------------------------------
+
+# Modified the file permission of user directory
+chmod 755 /home/tomcat
+
+# Set up the access right for Apache Tomcat log
+touch /home/tomcat/tomcat_base/logs/catalina-daemon.out
+chmod 644 /home/tomcat/tomcat_base/logs/catalina-daemon.out
+
+# Set up the correct owner
+chown -R tomcat.tomcat /home/tomcat/tomcat_base
+
+------------------------------------------------------
+Configure Apache Tomcat to run as daemon
+------------------------------------------------------
+
+# Copy the init script "etc/init.d/tomcat" to server installation path "/etc/init.d/tomcat"
+
+# Set up the access right
+chmod +x /etc/init.d/tomcat
+
+# Make necessary changes to the configuration section of the script
+
+# Add to chkconfig
+chkconfig --add tomcat
+
+# Configure to automatically start
+chkconfig tomcat on
+
+------------------------------------------------------
+Start Apache Tomcat
+------------------------------------------------------
+
+service tomcat start
+
+------------------------------------------------------
+Configure logrotate
+------------------------------------------------------
+
+# Copy the config file "etc/logrotate.d/tomcat" to logrotate directory "/etc/logrotate.d"
+
+# Make necessary changes to the configuration file
+
+# Test if logrotate is working
+logrotate -d -f /etc/logrotate.d/tomcat

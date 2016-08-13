@@ -1,0 +1,8 @@
+/home/tomcat/tomcat_base/logs/catalina-daemon.out {
+    size 10M
+    rotate 10
+    missingok
+    notifempty
+    dateext
+    copytruncate
+}
