@@ -1,0 +1,38 @@
+######################################################################
+# Steps for RHEL 5 and RHEL 6
+######################################################################
+# Copy the interface configuration file for alias
+cp /etc/sysconfig/network-scripts/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth0:0
+cp /etc/sysconfig/network-scripts/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth0:1
+
+# Edit the copied file
+vim /etc/sysconfig/network-scripts/ifcfg-eth0:0
+
+# Modified device name from "eth0" to "eth0:0"
+# DEVICE=eth0:0
+
+# Modified the IP address to the alias one
+# (Example) IPADDR=192.168.1.111
+
+# Repeat the same on another interface configuration file
+vim /etc/sysconfig/network-scripts/ifcfg-eth0:1
+
+# Restart the network interface
+service network restart
+
+# (If nedeed) Restart the network interface second time if the IP in the new alias is just released from other server. It makes the router learn the IP has been switched to another machine
+service network restart
+
+# Verify if the old configuration and new alias is working or not
+ping 192.168.1.110
+ping 192.168.1.111
+ping 192.168.1.112
+
+# (Reference) Example of minimal interface configuration file for alias
+DEVICE=eth0:0
+BOOTPROTO=static
+BROADCAST=192.168.1.255
+IPADDR=192.168.1.111
+NETMASK=255.255.255.0
+NETWORK=192.168.1.0
+ONBOOT=yes

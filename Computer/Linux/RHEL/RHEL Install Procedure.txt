@@ -1,0 +1,267 @@
+---------------------Preparation Task---------------------
+
+Download and burn the latest OS installation disc
+Prepare installation number (for RHEL5 or below)
+
+---------------------OS Installation---------------------
+
+(If needed) Name the LVM Volume Group as "VolGroup" or "VolGroup00" or "vg_servername"
+(If needed) Name the Logical Volume Name as "lv_mountpoint" or "LogVol00"
+(If needed) Delete all network interface configuration if channel bonding is going to be used
+(RHEL6 only) Choose "Basic Server" installation
+(RHEL6 only) Choose to install the following "Desktop" package
+	Desktop
+	General Purpose Desktop
+	Graphical Administration Tools
+	X Window System
+(RHEL6 only) Choose to install the following "Application" package
+	Internet Browser
+(RHEL6 only) Choose to install the following "Languages" package
+	Chinese Support
+Don't install MySQL since version available on Red Hat Network is old
+(REHL5 only, if needed) Disable firewall
+(REHL5 only, if needed) Set SELinux to Permissive
+Create regular user named "om"
+
+---------------------Network Configuration---------------------
+
+(If needed) Disable IPv6 firewall
+	chkconfig ip6tables off
+(DHCP only, if network not working properly) Disable Ethernet link down checking
+	cat "/etc/sysconfig/network-scripts/ifcfg-eth0"
+	echo "check_link_down() {return 1;}" >> "/etc/sysconfig/network-scripts/ifcfg-eth0"
+	cat "/etc/sysconfig/network-scripts/ifcfg-eth0"
+(If needed) Disable NetworkManager
+	chkconfig NetworkManager off
+	service NetworkManager stop
+(If needed) Configure network with channel bonding
+	# (Reference) http://docs.redhat.com/docs/en-US/Red_Hat_Enterprise_Linux/6/html/Deployment_Guide/sec-Using_Channel_Bonding.html
+	vim /etc/sysconfig/network-scripts/ifcfg-bond0
+		DEVICE=bond0
+		#(RHEL6 only) NM_CONTROLLED=no
+		#(If needed) MACADDR=6C:54:82:06:A4:A6
+		ONBOOT=yes
+		#(Sample) IPADDR=192.168.1.1
+		#(Sample) NETMASK=255.255.255.0
+		#(Sample) GATEWAY=192.168.0.1
+		BOOTPROTO=none
+		USERCTL=no
+		BONDING_OPTS="mode=active-backup miimon=100"
+	# Replace "X" below by 0, 1, 2, etc
+	vim /etc/sysconfig/network-scripts/ifcfg-ethX
+		DEVICE=ethX
+		#(RHEL6 only) NM_CONTROLLED=no
+		#(If needed) HWADDR=6C:54:82:06:27:A4
+		#(Reference) HWADDR=6C:54:82:06:27:A6
+		ONBOOT=yes
+		BOOTPROTO=none
+		MASTER=bond0
+		SLAVE=yes
+		USERCTL=no
+	vim /etc/modprobe.d/bonding.conf
+		alias bond0 bonding
+	modprobe -v bonding
+	service network restart
+	cat /proc/net/bonding/bond0
+(Check ifconfig to see if needed) Turn the interface up by "ifup eth0"
+Configure DNS
+	cat "/etc/resolv.conf"
+	#(Sample) echo "nameserver 192.168.1.1" > "/etc/resolv.conf"
+	cat "/etc/resolv.conf"
+Configure NTP
+	(If needed) ntpdate -d 192.168.1.1
+	vim /etc/ntp.conf
+		Comment out Red Hat public NTP server
+		#(Sample) server 192.168.1.1
+	chkconfig ntpd on
+	service ntpd restart
+
+---------------------Red Hat Registration---------------------
+
+(If needed) List subscription status
+	subscription-manager list
+(If needed) List configuration
+	subscription-manager config --list
+(If needed) Configure proxy
+	#(Sample) subscription-manager config --server.proxy_hostname=proxy.example.com --server.proxy_port=8080 --server.proxy_user=admin --server.proxy_password=secret
+Register system
+	subscription-manager register
+Check pool ID
+	subscription-manager list --available
+Subscribe to subscription
+	#(Sample) subscription-manager subscribe --pool 0a66c77b192994efba08502caa000c1e
+
+---------------------Package Management---------------------
+
+(If needed) Configure proxy
+	vim /etc/yum.conf
+		# Add the following line in [main] section
+		#(Sample) proxy=http://proxy.example.com:8080/
+(If needed, RHEL6 only?) Add Red Hat installation disc as yum repo
+	vim /etc/yum.repos.d/media.repo
+		[InstallMedia]
+		name=Red Hat Enterprise Linux
+		baseurl="file:///media/RHEL_6.2 x86_64 Disc 1"
+		enabled=1
+		gpgcheck=0
+(If needed, RHEL6 only) Install telnet package
+	yum install telnet.x86_64
+Perform "yum update"
+Install 3rd party yum repo "remi"
+	# (If needed) Configure proxy
+		export http_proxy=http://172.25.2.6:8080/
+	# Check the latest link for epel repo
+		#(Reference, RHEL6 only) http://ftp.cuhk.edu.hk/pub/linux/fedora-epel/6/i386/repoview/epel-release.html
+		#(Reference, RHEL5 only) http://download.fedoraproject.org/pub/epel/5/i386/repoview/epel-release.html
+	# Get epel repo
+		#(RHEL6 only) wget http://ftp.cuhk.edu.hk/pub/linux/fedora-epel/6/i386/epel-release-6-7.noarch.rpm
+		#(RHEL5 only) wget http://download.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+	# Get remi repo
+		#(RHEL6 only) wget http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+		#(RHEL5 only) wget http://rpms.famillecollet.com/enterprise/remi-release-5.rpm
+	# Install the repo
+		#(Reference) rpm -ivh epel-release-6-7.noarch.rpm remi-release-6.rpm
+Enable "remi" repo by setting "enabled" option in "remi" session from 0 to 1
+	vim /etc/yum.repos.d/remi.repo
+		[remi]
+		enabled=1
+Perform "yum update"
+
+---------------------Server Management---------------------
+
+genhostid
+
+---------------------User Account---------------------
+
+Modify om
+	usermod -g users -c "O&M" om
+	groupdel om
+
+Add user myuser
+	useradd -c "My user account" myuser
+	passwd myuser
+	su - myuser
+	cd
+	mkdir -m 700 .ssh
+	touch .ssh/authorized_keys
+	chmod 644 .ssh/authorized_keys
+	vim .ssh/authorized_keys
+		#(Sample) ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEApsEuOICA+HNzMx4zwPExKJjg/YhNTgiBAkEvUaFp7hwapV+8gpgvrMqpjepc6C6Y+e1pYtt+CsCwsQNOBCWVHC1Up2nlrMEbnB1X36f7W3zHsFTrOSt5HVgZXYFYL2AZGGTshHMc37Kg2FfFzyzHL7uWleSalatvb98QPyN8A8WPNTOM/el6LEGI4F1RZYCmBWJNJrdGmKdEdhG9eUvYVDiNq+ByUy+LiJWWRfda6tqMNh18FkSlBer4cy9kRWbaDXuMiRa+dDJUKmzfaCBqk3hekYxvx+ZEihHGgz4E9nFTrPFmNUEqm4THskanowl4fMx60C1adQgrVDegS3nvfQ== mykeyname
+
+---------------------Package---------------------
+
+HTTP
+	yum install httpd.x86_64 httpd-manual.x86_64 httpd-devel.x86_64
+	chkconfig httpd on
+	service httpd start
+
+MySQL
+	yum install mysql.x86_64 mysql-server.x86_64 perl-DBD-MySQL.x86_64 mysql-libs.x86_64 mysql-devel.x86_64
+	chkconfig mysqld on
+	service mysqld start
+
+PHP
+	yum install php.x86_64 php-cli.x86_64 php-common.x86_64 php-mbstring.x86_64
+	(If needed) yum install php-mysql.x86_64
+
+C/C++
+	yum install gcc.x86_64
+	yum install gcc-c++.x86_64
+
+JDK
+	wget http://download.oracle.com/otn-pub/java/jdk/7u2-b13/jdk-7u2-linux-x64.rpm
+	rpm -ivh jdk-7u2-linux-x64.rpm
+
+---------------------Enable Remote Access for Installation required Display---------------------
+
+# Check current status
+gconftool-2 -g /desktop/gnome/remote_access/enabled
+gconftool-2 -g /desktop/gnome/remote_access/prompt_enabled
+gconftool-2 -g /desktop/gnome/remote_access/view_only
+
+# Enable remote access
+gconftool-2 -s -t bool /desktop/gnome/remote_access/enabled ture
+gconftool-2 -s -t bool /desktop/gnome/remote_access/prompt_enabled false
+
+# Set the display to avoid warning
+export DISPLAY=:0.0
+
+# (Only work on some version of vino server) Start the VNC vino server
+/usr/libexec/vino-server
+
+# Do your own work at using VNC connection
+# ......
+
+# Disable remote access
+gconftool-2 -s -t bool /desktop/gnome/remote_access/enabled false
+gconftool-2 -s -t bool /desktop/gnome/remote_access/prompt_enabled ture
+
+---------------------Security---------------------
+
+# Adding login banner
+vim /etc/issue.ssh
+	# Input the following content
+---------------------------------------------------------------------
+WARNING: Authorized Users Only
+
+The network and computing resources that you are going to access are
+solely for business purposes. Misuse or misappropriation is strictly
+prohibited.
+
+The company reserves the right to audit all computers and systems
+which are connected to the network, the right to inspect all
+electronic communications, data and information stored or transmitted
+on the company's network and computing resources when necessary
+appropriate and in accordance with local law. The company also
+reserves the right to add necessary files to and modify the
+configuration of any connected computer and system to ensure both the
+security and integrity of the company's network and computing
+resources.
+
+By completing the logon process you are acknowledging and consenting
+to the above clauses. If you are not an authorized user please
+discontinue now.
+---------------------------------------------------------------------
+vim /etc/ssh/sshd_config
+	# Include the following line
+	Banner /etc/issue.ssh
+service sshd restart
+
+# Change the maximum number of days a password may be used to 180 days
+vim /etc/login.defs
+	PASS_MAX_DAYS   180
+
+---------------------Unused Command for Reference---------------------
+
+yum install mysql-devel.x86_64
+	(5.5.19 will cause installation of perl module DBI::mysql fail. Use 5.1.60)
+
+yum install pam-devel.x86_64
+yum install openssl-devel.x86_64
+yum install httpd-devel.x86_64
+yum install libtool.x86_64
+
+Update requierd module for webmin Perl module
+	perl -MCPAN -e shell
+	install Bundle::CPAN
+	install Authen::Libwrap
+	install IO::Pty
+	install Net::LDAP
+	install Authen::PAM
+	install Net::SSLeay
+	install DBD::mysql
+	install CPAN::Reporter
+	install Sys::Syslog
+
+yum install yum-utils.noarch
+
+
+Install Webmin
+	(Reference) http://www.webmin.com/
+	wget http://prdownloads.sourceforge.net/webadmin/webmin-1.580-1.noarch.rpm
+Update Perl module used by Webmin
+	yum install perl-Net-SSLeay.x86_64
+	yum install perl-LDAP.noarch
+	yum install perl-Authen-PAM.x86_64
+	yum install perl-IO-Tty.x86_64
+Enable HTTPS for Webmin

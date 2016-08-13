@@ -25,31 +25,59 @@ Configure the following options
 			Hardware Monitoring Utilities
 Set up network and hostname
 	Set hostname
-	(If needed) Set Ethernet device
+	(If needed) Set Ethernet device, only required for access mode direct connect, no need to set if interface is used by team or VLAN
 		General:
 			Automatically connect to this network when it is available: Checked
 			All users may connect to this network: Checked
+			# The following setting is the same as "Never use this network for default route" in nmtui
+			(If needed) Never use this network for default route: Checked
+		IPv4 Settings:
+			Routes:
+				(If needed, for non-default route interface) Use this connection only for resources on its network: Checked
 		IPv6 Settings:
 			Method: Ignore
 	(If needed) Add team device
 		Connection name: team0
-		Interface name: team0
-		Automatically connect to this network when it is available: Checked
-		Teamed connections:
-			Conncetion 1:
-				Connection type: Ethernet
-				Connection name: eth0
-				Automatically connect to this network when it is available: Checked
-				Device MAC address: (Set to the MAC address of port #1 of the server)
-			Connection 2:
-				Connection type: Ethernet
-				Connection name: eth1
-				Automatically connect to this network when it is available: Checked
-				Device MAC address: (Set to the MAC address of port #2 of the server)
-		JSON config:
-			{"runner": {"name": "activebackup"}, "link_watch": {"name": "ethtool"}}
-		JSON config (In case the above failure, try this one which works on VirtualBox host-only adapater):
-			{"runner": {"name": "activebackup", "hwaddr_policy": "by_active"}, "link_watch": {"name": "ethtool"}}
+		General:
+			# The following setting is required too for VLAN running on this team device
+			Automatically connect to this network when it is available: Checked
+		Team:
+			Interface name: team0
+			Teamed connections:
+				Conncetion 1:
+					Connection type: Ethernet
+					Connection name: team0s1
+					General:
+						Automatically connect to this network when it is available: Checked
+					Ethernet:
+						Device: (Set to the device name of port 1 of the server)
+				Connection 2:
+					Connection type: Ethernet
+					Connection name: team0s2
+					General:
+						Automatically connect to this network when it is available: Checked
+					Ethernet:
+						Device: (Set to the device name of port 2 of the server)
+			JSON config
+				# (By default the team device and all ports will use the same MAC address)
+				{"runner": {"name": "activebackup"}, "link_watch": {"name": "ethtool"}}
+				# (In case the above failed to work, try this one which works on VirtualBox host-only adapter. The team device will use MAC address of the active NIC.)
+				{"runner": {"name": "activebackup", "hwaddr_policy": "by_active"}, "link_watch": {"name": "ethtool"}}
+		IPv4 Settings:
+			(If VLAN is used on this interface) Method: Disabled
+		IPv6 Settings:
+			Method: Ignore
+	(If needed) Add VLAN
+		Connection name: xxxxxxxx.yyyyyyyy
+		General:
+			Automatically connect to this network when it is available: Checked
+		VLAN:
+			Parent interface: xxxxxxxx (Set to the used device name)
+			VLAN id: yyyyyyyy
+			VLAN interface name: xxxxxxxx.yyyyyyyy
+		IPv4 Settings:
+			Routes:
+				(If needed, for non-default route interface) Use this connection only for resources on its network: Checked
 		IPv6 Settings:
 			Method: Ignore
 (If needed) Set up Network Time (This will use chrony suite, which is recommended for all systems which are frequently suspended or otherwise intermittently disconnected and reconnected to a network such as mobile and virtual systems. Do not set up network time during installation if you would like to use ntpd, which is for systems which are normally kept permanently on)
@@ -68,21 +96,84 @@ Set partition layout, reference https://access.redhat.com/documentation/en-US/Re
 Set root password
 (If needed) Set user creation
 
+---------------------Configure Backup Alias---------------------
+
+# (If needed) Add backup command alias
+cat >> ~/.bashrc <<EOF
+
+#-------------------------------------------------------------------------------
+# Our alias
+#-------------------------------------------------------------------------------
+mkbak() {
+	cp -pv "\$1" "\$1.\$(date +"%Y%m%d%H%M%S").bak"
+}
+EOF
+source ~/.bashrc
+
 ---------------------Network Configuration---------------------
 
-(If needed) Modify NIC and DNS setting
-vim /etc/sysconfig/network-scripts/ifcfg-<interface>
+# (If needed) Modify NIC and DNS setting using NetworkManager, required NetworkManager running, can be stopped after edit
+nmtui
 
-(If needed) Configure proxy
+# (If needed) Disable desktop oriented NetworkManager to avoid trouble caused by it
+# For example with NetworkManager in use, if ethernet is not plugged in when server boot, team connection will not be function even ethernet is plugged in later, because the corresponding port is not enabled in team connection
+systemctl start NetworkManager
+systemctl disable NetworkManager
+
+# (If needed) Modify NIC and DNS setting
+mkbak /etc/sysconfig/network-scripts/ifcfg-<interface>
+vim /etc/sysconfig/network-scripts/ifcfg-<interface>
+	# (If needed, for team device) Remove the HWADDR generated by installer in team slave to prevent the generated warning in the log
+	# (If needed, for team device) Fix the incorrect TEAM_MASTER entry generated by nmtui. The value should be a device name, not device UUID.
+
+# (If needed) Restart network to apply new changes, works regardless whether NetworkManager is used or not
+systemctl restart network
+
+# Check if any error on network interface configuration
+less /var/log/messages
+
+# (If needed) Set default gateway for multi-subnet connected server
+# Reference https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html-single/Networking_Guide/
+vim /etc/sysconfig/network-scripts/ifcfg-<interface>
+	DEFROUTE=yes
+
+# (If needed) Configure proxy
+mkbak /etc/environment
 vim /etc/environment
 	# Include the following lines
 	export http_proxy='http://proxy.example.com:8080/'
 	export https_proxy='http://proxy.example.com:8080/'
 
----------------------Network Testing---------------------
+---------------------Network Start Stop---------------------
 
-# Check teaming status and test active-backup by unpluging Ethernet cable
+# Disable interface
+ip link set dev eth1 down
+
+# Enable interface
+ip link set dev eth1 up
+
+# Start DHCP client (Just need to disconnect all cables used by static IP, no need to disable all network interfaces)
+dhclient
+
+# Stop DHCP client
+killall dhclient
+
+---------------------Check Network Status---------------------
+
+# Check link and IP
+ip addr show
+
+# Check link
+ip link show
+
+# Check routing
+ip route
+
+# Check team status and test active-backup by unplug Ethernet cable
 teamdctl team0 state
+
+# Check team port link speed
+teamnl team0 ports
 
 ---------------------Firewall Configuration---------------------
 
@@ -102,7 +193,7 @@ firewall-cmd [--permanent] [--zone=<zone>] --query-interface=<interface>
 # Change the zone of an interface belongs to (it may not work on Ethernet device due to a bug described at https://bugs.centos.org/view.php?id=7526)
 firewall-cmd [--permanent] [--zone=<zone>] --change-interface=<interface>
 
-# Set the zone of an interface in ifcfg file
+# (If needed) Set the zone of an interface in ifcfg file
 cat "/etc/sysconfig/network-scripts/ifcfg-<interface>"
 echo "ZONE=<zone>" >> "/etc/sysconfig/network-scripts/ifcfg-<interface>"
 cat "/etc/sysconfig/network-scripts/ifcfg-<interface>"
@@ -176,24 +267,26 @@ systemctl restart firewalld
 
 ---------------------NTP Configuration---------------------
 
-(If needed) Disable and remove chronyd
-	yum autoremove chrony
-	rm -i /etc/chrony.keys.rpmsave
-	rmdir /var/log/chrony
+# (If needed) Disable and remove chronyd
+yum autoremove chrony
+rm -i /etc/chrony.keys.rpmsave
+rmdir /var/log/chrony
 
-(If needed) Set up NTP using ntpd (For systems which are normally kept permanently on)
-	yum install ntp
-	vim /etc/ntp.conf
-		# Comment out CentOS public NTP server
-		# Include the following line
-		server <host> iburst
-	systemctl enable ntpd
-	systemctl start ntpd
+# (If needed) Set up NTP using ntpd (For systems which are normally kept permanently on)
+yum install ntp
+mkbak /etc/ntp.conf
+vim /etc/ntp.conf
+	# Comment out CentOS public NTP server
+	# Include the following line, where xxx.xxx.xxx.xxx is the NTP server address
+	server xxx.xxx.xxx.xxx iburst
+systemctl enable ntpd
+systemctl start ntpd
 
-(If needed) Modify NTP for chronyd
-	vim /etc/chrony.conf
-		# Include or modify the following line
-		server <host> iburst
+# (If needed) Modify NTP for chronyd
+mkbak /etc/chrony.conf
+vim /etc/chrony.conf
+	# Include or modify the following line
+	server <host> iburst
 
 ---------------------NTP Testing---------------------
 
@@ -214,102 +307,64 @@ chronyc tracking
 # Display information about current sources
 chronyc sources -v
 
----------------------Package Management---------------------
+---------------------YUM Repo---------------------
 
-(If needed) Install telnet package
-	yum install telnet
-Install 3rd party yum repo
-	# remi
-		http://rpms.famillecollet.com/
-		http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
-	# MySQL
-		http://dev.mysql.com/downloads/repo/yum/
-		http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
-		(If needed) Selecting Mysql release series
-			vim /etc/yum.repos.d/mysql-community.repo
-	# Installation
-		#(Reference only) yum install epel-release-7-5.noarch.rpm remi-release-7.rpm mysql-community-release-el7-5.noarch.rpm
-Perform "yum update"
-(If needed, especially when kernel is updated) Reboot server with "reboot"
+# Create folder for backup RPM which are installed outside YUM repo
+mkdir -p /root/conf/rpm
 
----------------------Security---------------------
+# Install remi 3rd party yum repo
+# Official website http://rpms.famillecollet.com/
+# (Reference only, download link may change) Download yum repo RPM
+wget -P /root/conf/rpm -N "http://rpms.famillecollet.com/enterprise/remi-release-7.rpm"
+# (Reference only, filename may change) Install yum repo RPM
+yum install remi-release-7.rpm
+# (If needed) Change the PHP version
+mkbak /etc/yum.repos.d/remi.repo
+vim /etc/yum.repos.d/remi.repo
+mkbak /etc/yum.repos.d/remi-php70.repo
+vim /etc/yum.repos.d/remi-php70.repo
 
-# (If needed) Adding login banner for local login
-sed -i '1i WARNING: Authorized Users Only' /etc/issue
+# Install MySQL yum repo
+# Official website http://dev.mysql.com/downloads/repo/yum/
+# (Reference only, download link may change) Download yum repo RPM
+wget -P /root/conf/rpm -N "http://dev.mysql.com/get/mysql57-community-release-el7-7.noarch.rpm"
+# (Reference only, filename may change) Install yum repo RPM
+yum install mysql57-community-release-el7-7.noarch.rpm
 
-# (If needed) Adding login banner for telnet
-sed -i '1i WARNING: Authorized Users Only' /etc/issue.net
+---------------------Package Update---------------------
 
-# (If needed) Adding login banner for SSH
-echo "WARNING: Authorized Users Only" >> /etc/issue.ssh
-vim /etc/ssh/sshd_config
-	# Include the following line
-	Banner /etc/issue.ssh
-systemctl restart sshd
+# Update packages
+yum update
 
-# (If needed) Increase log retention
-sed -i 's/rotate 4/#rotate 4/;/rotate 4/a rotate 13' /etc/logrotate.conf
+# (If needed) Update packages using no timeout setting, useful update via proxy
+yum --setopt=timeout=0 update
+
+# (If needed, especially when kernel is updated) Reboot server
+reboot
+
+# (If needed) Remove packages which are not installed by users and are not depend by other packages
+yum autoremove
 
 ---------------------Server Management---------------------
 
 # (If needed) Generate new host ID
 genhostid
 
----------------------Packages---------------------
+---------------------Log Retention---------------------
 
-PHP
-	yum install php
-	# (If needed) Install modules
-	yum install php-mbstring php-mysqlnd php-pdo php-intl
-	# Configure timezone
-	sed -i 's/;date.timezone =/date.timezone = "Asia\/Hong_Kong"/g' /etc/php.ini
-	# (For PHP 5.6, if needed) Disable deprecated always_populate_raw_post_data
-	sed -i 's/;always_populate_raw_post_data = -1/always_populate_raw_post_data = -1/g' /etc/php.ini
+# (If needed) Increase log retention
+mkbak /etc/logrotate.conf
+sed -i 's/rotate 4/#rotate 4/;/rotate 4/a rotate 13' /etc/logrotate.conf
 
-Apache HTTP Server
-	# Installed if PHP is installed
-	yum install httpd
-	# Configure ServerName
-	vim /etc/httpd/conf/httpd.conf
-	# Test Apache configuration
-	apachectl configtest
-	# Install SSL support
-	yum install mod_ssl
-	# (If needed) Install SSL support
-	yum install mod_ssl
+---------------------Additional Package Install---------------------
 
-MySQL
-	yum install mysql-community-server
-	(If needed) yum install mysql-utilities
-	# Configure MySQL
-	vim /etc/my.cnf
-	systemctl is-enabled mysqld
-	systemctl status mysqld
-	systemctl start mysqld
-	# (MySQL 5.7 onwards) Get the temporary password for root
-	grep 'temporary password' /var/log/mysqld.log
-	(If needed) mysql_secure_installation
+# (If needed) Install telnet package
+yum install telnet
 
-Server JRE (Includes JDK)
-	# Download Server JRE
-	# http://www.oracle.com/technetwork/java/javase/downloads/index.html
-	mkdir /usr/local/java
-	tar -xzvf server-jre-8u60-linux-x64.tar.gz -C /usr/local/java/
-	ln -s /usr/local/java/jdk1.8.0_60 /usr/local/java/latest
-	ln -s /usr/local/java/latest /usr/local/java/default
-	chown -R root:root /usr/local/java/
-	chcon -R -u system_u -t usr_t /usr/local/java/
-	ln -s /usr/local/java/default/bin/jar /usr/local/bin/jar
-	ln -s /usr/local/java/default/bin/java /usr/local/bin/java
-	ln -s /usr/local/java/default/bin/javac /usr/local/bin/javac
-	chcon -h -u system_u -t bin_t /usr/local/bin/jar
-	chcon -h -u system_u -t bin_t /usr/local/bin/java
-	chcon -h -u system_u -t bin_t /usr/local/bin/javac
-
-ClamAV
-	yum install clamav clamav-update
-	# Perform immediate update
-	/usr/bin/freshclam
-	# Enable automatic update
-	vim /etc/sysconfig/freshclam
-		# Remove line FRESHCLAM_DELAY=disabled-warn
+# (If needed) Install ClamAV antivirus
+yum install clamav clamav-update
+# Perform immediate update
+/usr/bin/freshclam
+# Enable automatic update
+vim /etc/sysconfig/freshclam
+	# Remove line FRESHCLAM_DELAY=disabled-warn

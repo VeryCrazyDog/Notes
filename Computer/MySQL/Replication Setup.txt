@@ -1,0 +1,225 @@
+# ------------------------------------------------------------------------------
+# Set up GTID based replication for MySQL 5.6.24
+# ------------------------------------------------------------------------------
+
+# On all servers, ensure option file includes the following options
+# Refer to Option File Guide for more information
+[mysqld]
+read-only=true
+server-id=0
+log-bin
+log-slave-updates=ON
+binlog-format=MIXED
+enforce-gtid-consistency=true
+gtid-mode=ON
+expire_logs_days=90
+
+# On master server, make sure an account for replication has been created
+GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%' IDENTIFIED BY 'password';
+# (If neccessary) Grant additional privilege to enable mysqlrplshow to run correctly
+GRANT REPLICATION CLIENT ON *.* TO 'repl'@'%';
+# Check granted privilege
+SHOW GRANTS FOR 'repl'@'%';
+
+# On any server in the replication chain, dump the database
+mysqldump -u root -p --all-databases --single-transaction --triggers --routines --events > `hostname`.sql
+
+# Transfer the dump file to new slave
+gzip `hostname`.sql
+scp `hostname`.sql.gz slave_host:/root
+
+# (If neccessary) Remove MySQL data directory
+systemctl stop mysqld
+rm -r /var/lib/mysql
+systemctl start mysqld
+
+# On slave server, unzip and import the dump data
+unzip master_hostname.sql.gz
+mysql < master_hostname.sql
+# Restart MySQL to enable new privilege as FLUSH PRIVILEGES will produce one transaction
+systemctl restart mysqld
+# Login to MySQL
+mysql -u root -p
+
+# After log in to MySQL, execute the following
+SHOW GLOBAL VARIABLES LIKE 'gtid%';
+CHANGE MASTER TO MASTER_HOST='master_host', MASTER_USER='repl', MASTER_PASSWORD='password', MASTER_AUTO_POSITION=1;
+START SLAVE;
+SHOW SLAVE STATUS\G
+
+################################################################################
+#################### Set up new master-slave replication #######################
+################################################################################
+
+On new master
+---------------------------------
+# ----- On terminal 1
+mysql -u root -p
+
+
+# ----- On terminal 1 mysql console
+# (if no existing slave) RESET MASTER;
+FLUSH TABLES WITH READ LOCK;
+SHOW MASTER STATUS\G
+SHOW SLAVE STATUS\G
+
+
+# ------ On terminal 2
+mysqldump -u root -p --events --master-data --all-databases > dumpdb.sql
+# (Wait until the command executed)
+
+
+# ----- On terminal 1 mysql console
+# Unlock all tables by exit the console
+EXIT
+
+
+# ------ On terminal 2
+gzip dumpdb.sql
+# Transfer file
+scp dumpdb.sql.gz root@192.168.1.52:/root
+rm -i dumpdb.sql.gz
+
+
+
+On existing slave
+---------------------------------
+# Record the replication password
+head -n 6 /var/lib/mysql/master.info | tail -n 1
+
+
+
+On new slave
+---------------------------------
+# ----- On terminal
+service mysqld stop
+# (if needed) vim /etc/my.cnf
+	# (If needed) Include the following line
+	# read_only
+mv /var/lib/mysql /var/lib/mysql_bk
+# (if needed) /usr/bin/mysql_install_db
+# (if needed) chown -R mysql.mysql /var/lib/mysql
+# (if needed) restorecon -vR /var/lib/mysql
+service mysqld start
+mysql
+
+
+# ----- On mysql console
+# Set up master info
+# This command must be execute before the data import so that the master 
+# position will not be reset by changing the master host
+# Example:
+CHANGE MASTER TO
+	MASTER_HOST='192.168.1.51',
+	MASTER_USER='repl',
+	MASTER_PASSWORD='mypassword';
+EXIT
+
+
+# ----- On terminal
+gunzip dumpdb.sql.gz
+mysql < dumpdb.sql
+mysql
+
+
+# ----- On mysql console
+SHOW SLAVE STATUS\G
+FLUSH PRIVILEGES;
+RESET MASTER;
+START SLAVE;
+SHOW SLAVE STATUS\G
+
+
+# ----- On terminal
+rm dumpdb.sql
+rm -rf /var/lib/mysql_bk
+
+
+
+################################################################################
+################# Set up additional master-slave replication ###################
+################################################################################
+
+On existing slave
+---------------------------------
+# ----- On terminal 1
+mysql -u root -p
+
+
+# ----- On terminal 1 mysql console
+FLUSH TABLES WITH READ LOCK;
+SHOW MASTER STATUS\G
+SHOW SLAVE STATUS\G
+# Take note of the value "Relay_Master_Log_File" and "Exec_Master_Log_Pos" from
+# the output of "SHOW SLAVE STATUS\G"
+# Assume Relay_Master_Log_File: mysql-bin.000019, Exec_Master_Log_Pos: 794943448
+
+
+# ----- On terminal 2
+mysqldump -u root -p --events --master-data --all-databases > dumpdb.sql
+# (Wait until the command executed)
+
+
+# ----- On terminal 1 mysql console
+# Unlock all tables by exit the console
+EXIT
+
+
+# ----- On terminal 2
+gzip dumpdb.sql
+# Transfer file
+scp dumpdb.sql.gz root@192.168.1.52:/root
+rm -i dumpdb.sql.gz
+
+
+
+On new slave
+---------------------------------
+# ----- On terminal
+# (if needed) vim /etc/my.cnf
+	# (If needed) Include the following line
+	# read_only
+service mysqld stop
+mv /var/lib/mysql /var/lib/mysql_bk
+# (if needed) /usr/bin/mysql_install_db
+# (if needed) chown -R mysql.mysql /var/lib/mysql
+# (if needed) restorecon -vR /var/lib/mysql
+service mysqld start
+gunzip dumpdb.sql.gz
+mysql < dumpdb.sql
+mysql
+
+
+# ----- On mysql console
+# Set up master info
+# Master password can be found in existing slave in file /var/lib/mysql/master.info
+# Example:
+CHANGE MASTER TO
+	MASTER_HOST='192.168.1.51',
+	MASTER_USER='repl',
+	MASTER_PASSWORD='mypassword',
+	MASTER_LOG_FILE='mysql-bin.000019',
+	MASTER_LOG_POS=794943448;
+SHOW SLAVE STATUS\G
+FLUSH PRIVILEGES;
+RESET MASTER;
+START SLAVE;
+SHOW SLAVE STATUS\G
+EXIT
+
+
+# ----- On terminal
+rm dumpdb.sql
+rm -rf /var/lib/mysql_bk
+
+
+
+################################################################################
+########################### Unlink existing slave ##############################
+################################################################################
+
+On slave
+---------------------------------
+# ----- On mysql console
+STOP SLAVE;
+RESET SLAVE ALL;

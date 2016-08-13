@@ -1,5 +1,8 @@
-For CentOS 7, Apache 2.4.6 with PHP 5.6.5
-============================================================
+--------------------------------------------------------------------------------
+CentOS 7, Apache 2.4.6
+--------------------------------------------------------------------------------
+# Configure
+mkbak /etc/httpd/conf/httpd.conf
 vim /etc/httpd/conf/httpd.conf
 	# Add the following lines before ServerRoot option
 		#
@@ -11,21 +14,35 @@ vim /etc/httpd/conf/httpd.conf
 		#
 		# Determines the behaviour on HTTP TRACE requests
 		TraceEnable off
-	# Set the Options to None for DocumentRoot
-		<Directory "/var/www/html">
+	# Set the Options to None for OS root
+		<Directory />
+			# Other options here
 			Options None
 		</Directory>
-vim /etc/httpd/conf.modules.d/00-base.conf
-	# Comment the following lines
-		#LoadModule autoindex_module modules/mod_autoindex.so
-		#LoadModule userdir_module modules/mod_userdir.so
+	# Set the Options to None for DocumentRoot
+		<Directory "/var/www/html">
+			# Other options here
+			Options None
+		</Directory>
+# Disable unused modules
+mkbak /etc/httpd/conf.modules.d/00-base.conf
+sed -i 's/^LoadModule autoindex_module/#LoadModule autoindex_module/g' /etc/httpd/conf.modules.d/00-base.conf
+sed -i 's/^LoadModule info_module/#LoadModule info_module/g' /etc/httpd/conf.modules.d/00-base.conf
+sed -i 's/^LoadModule status_module/#LoadModule status_module/g' /etc/httpd/conf.modules.d/00-base.conf
+sed -i 's/^LoadModule userdir_module/#LoadModule userdir_module/g' /etc/httpd/conf.modules.d/00-base.conf
+mkbak /etc/httpd/conf.modules.d/00-proxy.conf
+sed -i 's/^LoadModule proxy_/#LoadModule proxy_/g' /etc/httpd/conf.modules.d/00-proxy.conf
+# Comment out options used by disabled module
+mkbak /etc/httpd/conf.d/autoindex.conf
 sed -i -e 's/^/#/' /etc/httpd/conf.d/autoindex.conf
+# Test Apache configuration
 apachectl configtest
+# Restart Apache
+systemctl restart httpd
 
-
-
-For RHEL 6.4, Apache 2.2.15 with PHP 5.4.15
-============================================================
+--------------------------------------------------------------------------------
+RHEL 6.4, Apache 2.2.15
+--------------------------------------------------------------------------------
 vim /etc/httpd/conf/httpd.conf
 	# Change the setting ServerTokens
 		ServerTokens Prod

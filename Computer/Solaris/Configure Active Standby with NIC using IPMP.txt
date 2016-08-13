@@ -1,0 +1,34 @@
+# Reference: http://docs.oracle.com/cd/E19253-01/816-4554/6maoq01rd/index.html
+# Reference: http://docs.oracle.com/cd/E19253-01/816-4554/6maoq02r8/index.html
+
+# Determine whether all interfaces on the system currently use the system-wide MAC address
+# local-mac-address?=false, indicates that all interfaces do use the system-wide MAC address
+eeprom local-mac-address?
+# (If needed) Set the MAC address to use locally administered MAC address
+eeprom local-mac-address?=true
+# Check the MAC addresses of all the interfaces on the system
+ifconfig -a
+
+# Show all interfaces
+dladm show-link
+# Edit the interface configuration files
+vi /etc/hostname.e1000g0
+	# (If needed) ether 08:00:27:62:D7:2C
+	192.168.1.51 netmask 255.255.255.0 broadcast + group bond0 up
+vi /etc/hostname.e1000g1
+	# (If needed) ether 08:00:27:3E:D5:26
+	group bond0 standby up
+# Configure default gateway
+vi /etc/defaultrouter
+	192.168.1.1
+# (If needed) Configure the netmasks
+vi /etc/netmasks
+# Configure hostname
+vi /etc/inet/hosts
+	127.0.0.1	localhost
+	::1		localhost
+	192.168.1.51	myhost	.myhost
+# Reboot server for new configuration
+reboot -- -r
+# Double check the configuration and MAC address
+ifconfig -a

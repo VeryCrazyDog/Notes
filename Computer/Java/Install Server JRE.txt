@@ -1,0 +1,20 @@
+#-------------------------------------------------------------------------------
+# CentOS 7
+#-------------------------------------------------------------------------------
+
+# Download Server JRE
+# http://www.oracle.com/technetwork/java/javase/downloads/index.html
+
+# Install Server JRE
+mkdir /usr/local/java
+tar -xzvf server-jre-8u60-linux-x64.tar.gz -C /usr/local/java/
+ln -s /usr/local/java/jdk1.8.0_60 /usr/local/java/latest
+ln -s /usr/local/java/latest /usr/local/java/default
+chown -R root:root /usr/local/java/
+chcon -R -u system_u -t usr_t /usr/local/java/
+ln -s /usr/local/java/default/bin/jar /usr/local/bin/jar
+ln -s /usr/local/java/default/bin/java /usr/local/bin/java
+ln -s /usr/local/java/default/bin/javac /usr/local/bin/javac
+chcon -h -u system_u -t bin_t /usr/local/bin/jar
+chcon -h -u system_u -t bin_t /usr/local/bin/java
+chcon -h -u system_u -t bin_t /usr/local/bin/javac
