@@ -4,19 +4,30 @@
 
 -- Reference: http://msdn.microsoft.com/en-us/library/ms186865%28v=sql.110%29.aspx
 
--- Backup database with new media and overwrite backup set
-BACKUP DATABASE [database_name] TO DISK = N'path_to_media_file' WITH FORMAT, INIT, MEDIANAME = N'media_name', NAME = N'backup_set_name', SKIP, STATS = 10, CHECKSUM
+-- One time database backup to a new media set and erase all existing backup sets
+BACKUP DATABASE [testdb] TO DISK = N'C:\TEMP\testdb.bak' WITH COPY_ONLY, FORMAT, INIT, NAME = N'testdb-Full Database Backup', SKIP, NOREWIND, NOUNLOAD, STATS = 10
 GO
 
--- Backup transaction log to existing media and overwrite backup set
-BACKUP LOG [database_name] TO DISK = N'path_to_media_file' WITH NOFORMAT, INIT, NAME = N'backup_set_name', SKIP, STATS = 10, CHECKSUM
+-- One time transaction log backup to a new media set and erase all existing backup sets
+BACKUP LOG [testdb] TO DISK = N'C:\TEMP\testdb.trn' WITH COPY_ONLY, FORMAT, INIT, NAME = N'testdb-Transaction Log Backup', SKIP, NOREWIND, NOUNLOAD, STATS = 10
 GO
 
--- (To be tested again) Restore database and overwrite existing database
+-- (To be verify if applicable to database with mirroring) Restore database to a previous point from backup
 USE [master]
-ALTER DATABASE [database_name] SET SINGLE_USER WITH ROLLBACK IMMEDIATE
-RESTORE DATABASE [database_name] FROM DISK = N'path_to_media_file' WITH FILE = 1, MOVE N'database_name' TO N'new_database_data_file_mdf_path', MOVE N'database_log_name' TO N'new_database_data_file_ldf_path', REPLACE, STATS = 5
-ALTER DATABASE [database_name] SET MULTI_USER
+-- Disconnect all existing connection by set the database to single user mode, and rollback all incomplete transaction
+ALTER DATABASE [testdb] SET SINGLE_USER WITH ROLLBACK IMMEDIATE
+-- Backup tail log to existing media and append to existing backup set, leave the database in restore mode for database restore
+BACKUP LOG [testdb] TO DISK = N'C:\TEMP\testdb_taillog.bak' WITH NOFORMAT, NOINIT, NAME = N'testdb-taillog Backup', NOSKIP, NOREWIND, NOUNLOAD, NORECOVERY, STATS = 5
+-- Restore database backup from position 1 in backup set, and rollback all incomplete transactions at the time of backup after restore
+RESTORE DATABASE [testdb] FROM DISK = N'C:\TEMP\testdb.bak' WITH FILE = 1, NOUNLOAD, STATS = 5
+-- Set to multi user mode
+ALTER DATABASE [testdb] SET MULTI_USER
+GO
+
+-- Restore database to a new database
+USE [master]
+-- Restore from position 1 in backup set, and rollback all incomplete transactions at the time of backup after restore
+RESTORE DATABASE [new_testdb] FROM DISK = N'C:\TEMP\testdb.bak' WITH FILE = 1, MOVE N'testdb' TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\new_testdb.mdf', MOVE N'testdb_log' TO N'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER\MSSQL\DATA\new_testdb_log.ldf', NOUNLOAD, STATS = 5
 GO
 
 -----------------------------------------

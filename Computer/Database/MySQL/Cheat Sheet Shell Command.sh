@@ -18,3 +18,11 @@ mysql_config_editor print --all
 # The login user must have the REPLICATION SLAVE and REPLICATION CLIENT privileges to successfully execute this utility
 mysqlrplshow --master=<login_path_name>:3306 --discover-slaves-login=<login_path_name> --recurse
 mysqlrplshow --master=<username>:<password>@<master_host> --discover-slaves-login=<username>:<password> --recurse
+
+# Connect via unixODBC using SQLDriverConnect
+# Reference: https://dev.mysql.com/doc/connector-odbc/en/connector-odbc-configuration-connection-parameters.html
+isql -v -k "DRIVER={MySQL ODBC 5.3 Unicode Driver};SERVER=localhost;PORT=;SOCKET={/var/lib/mysql/mysql.sock};DATABASE=;USER=username;PASSWORD=password;OPTION=3;"
+
+# Connect via unixODBC using DNS
+# Reference: https://dev.mysql.com/doc/connector-odbc/en/connector-odbc-configuration-connection-parameters.html
+isql -v dns username password
