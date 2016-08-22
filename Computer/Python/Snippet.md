@@ -21,6 +21,7 @@ def detect_encoding(path, default_encoding = 'utf-8'):
 Main class implementation
 
 ```python
+import sys
 import os
 import socket
 import configparser

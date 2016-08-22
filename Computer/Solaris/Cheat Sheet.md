@@ -9,10 +9,10 @@ prtconf | grep Memory
 
 # System Information
 
-Check resource usage summary for each user
+Check resource usage summary for each processe and user, sorted by size of the process image
 
 ```sh
-prstat –t
+prstat –a -s size
 ```
 
 
@@ -20,4 +20,11 @@ Print resource usage for every 2 second for a total of 3 cycles, swap and free a
 
 ```sh
 vmstat 2 3
+```
+
+
+Print summary information about total swap space usage
+
+```sh
+swap -s
 ```
