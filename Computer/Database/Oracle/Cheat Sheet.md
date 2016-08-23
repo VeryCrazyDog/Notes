@@ -65,6 +65,20 @@ WHERE IDXS.OWNER = USER AND COLS.TABLE_NAME LIKE UPPER('%')
 ORDER BY IDXS.OWNER, COLS.TABLE_NAME, IDXS.INDEX_NAME, COLS.COLUMN_POSITION;
 ```
 
+Find current value of a sequence
+
+```sql
+SELECT
+	sequence_owner,
+	sequence_name,
+	last_number
+FROM all_sequences
+WHERE
+	sequence_owner = USER
+	AND sequence_name LIKE '%';
+```
+
+
 ## Data Size Information
 
 Find overall database file size and tablespaces free space, please notice that the
@@ -116,6 +130,7 @@ GROUP BY owner
 ORDER BY gigabytes DESC;
 ```
 
+
 ## Session Information
 
 Find locked objects and their respective session
@@ -141,4 +156,39 @@ Kill session with session ID `SESSION_ID` equal to `777` and serial number `SERI
 
 ```sql
 ALTER SYSTEM KILL SESSION '777, 1234' IMMEDIATE;
+```
+
+
+
+# Database Checking
+
+Check if columns are the same as their corresponding reference table
+
+```sql
+-- This assume the table is named 'tb_table_name' and the reference table is named 'tb_log_table_name'
+SELECT
+	a.table_name AS a_table_name,
+	b.table_name AS b_table_name,
+	a.column_name,
+	a.data_type AS a_data_type,
+	b.data_type AS b_data_type,
+	a.data_length AS a_data_length,
+	b.data_length AS b_data_length,
+	a.data_precision AS a_data_precision,
+	b.data_precision AS b_data_precision,
+	a.nullable AS a_nullable,
+	b.nullable AS b_nullable
+FROM ALL_TAB_COLUMNS a INNER JOIN ALL_TAB_COLUMNS b
+	ON
+		a.owner = b.owner
+		AND SUBSTR(a.table_name, 0, 3) || 'LOG_' || SUBSTR(a.table_name, 4) = b.table_name
+		AND a.column_name = b.column_name
+WHERE
+	a.owner = USER
+	AND (
+		a.data_type <> b.data_type
+		OR a.data_length <> b.data_length
+		OR a.data_precision <> b.data_precision
+		OR a.nullable <> b.nullable
+	);
 ```
