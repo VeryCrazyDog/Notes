@@ -24,7 +24,7 @@ zpool list
 Check resource usage summary for each processe and user, sorted by size of the process image
 
 ```sh
-prstat –a -s size
+prstat -a -s size
 ```
 
 Print resource usage for every 2 second for a total of 3 cycles, swap and free are in Kbytes
