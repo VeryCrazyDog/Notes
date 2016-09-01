@@ -52,17 +52,17 @@ Find table indexes and their respective columns
 
 ```sql
 SELECT
-	IDXS.OWNER,
-	COLS.TABLE_NAME,
-	IDXS.INDEX_NAME,
-	IDXS.UNIQUENESS,
-	COLS.COLUMN_NAME,
-	COLS.COLUMN_POSITION,
-	COLS.DESCEND
-FROM ALL_INDEXES IDXS INNER JOIN ALL_IND_COLUMNS COLS
-	ON IDXS.OWNER = COLS.INDEX_OWNER AND IDXS.INDEX_NAME = COLS.INDEX_NAME
-WHERE IDXS.OWNER = USER AND COLS.TABLE_NAME LIKE UPPER('%')
-ORDER BY IDXS.OWNER, COLS.TABLE_NAME, IDXS.INDEX_NAME, COLS.COLUMN_POSITION;
+	idxs.owner,
+	cols.table_name,
+	idxs.index_name,
+	idxs.uniqueness,
+	cols.column_name,
+	cols.column_position,
+	cols.descend
+FROM all_indexes idxs INNER JOIN all_ind_columns cols
+	ON idxs.owner = cols.index_owner AND idxs.index_name = cols.index_name
+WHERE idxs.owner = USER AND cols.table_name LIKE UPPER('%')
+ORDER BY idxs.owner, cols.table_name, idxs.index_name, cols.column_position;
 ```
 
 Find current value of a sequence
@@ -136,12 +136,39 @@ ORDER BY gigabytes DESC;
 Find locked objects and their respective session
 
 ```sql
-SELECT A.INST_ID, A.SESSION_ID, B."SERIAL#", B.STATUS, A.ORACLE_USERNAME, A.OS_USER_NAME, A.PROCESS, C.NAME, B.MACHINE
-FROM GV$LOCKED_OBJECT A
-	INNER JOIN GV$SESSION B ON A.SESSION_ID = B.SID
-	INNER JOIN SYS.OBJ$ C ON A.OBJECT_ID = C."OBJ#";
+SELECT
+	l.inst_id,
+	l.session_id,
+	s."SERIAL#",
+	s.status,
+	l.oracle_username,
+	s.machine,
+	l.os_user_name,
+	l.process,
+	o.name
+FROM gv$locked_object l
+	INNER JOIN gv$session s ON s.inst_id = l.inst_id AND s.sid = l.session_id
+	INNER JOIN sys.obj$ o ON o."OBJ#" = l.object_id
+WHERE l.oracle_username = USER;
 ```
 
+Find the object accessing by user
+
+```sql
+-- This SQL will takes some time when criteria is given to gv$access
+SELECT s.inst_id, s.sid, s."SERIAL#", s.status, s.username, s.machine, a.owner, a.object, a.type
+FROM gv$session s INNER JOIN gv$access a
+ON s.inst_id = a.inst_id AND s.sid = a.sid
+WHERE s.username = USER;
+```
+
+Find sessions that are not idle and waiting indefinitely
+
+```sql
+SELECT sid, "SERIAL#", username, command, schemaname, osuser, machine, logon_time, event, wait_class, state
+FROM v$session
+WHERE username = USER AND wait_class <> 'Idle' AND time_remaining_micro = -1;
+```
 
 
 # Operation on Database
@@ -191,4 +218,22 @@ WHERE
 		OR a.data_precision <> b.data_precision
 		OR a.nullable <> b.nullable
 	);
+```
+
+## SQL Generation
+
+Generate DROP statement for all objects in database, excluding database links.
+
+```sql
+-- Indexes, LOBs, system generated types will be dropped automatically when the related objects are dropped
+SELECT
+	'DROP ' || object_type || ' ' || object_name ||
+		CASE
+			WHEN object_type = 'TABLE' THEN ' CASCADE CONSTRAINTS'
+			ELSE ''
+		END || ';' AS sql
+FROM user_objects
+WHERE
+	object_type NOT IN ('DATABASE LINK', 'LOB', 'INDEX')
+	AND NOT (object_type = 'TYPE' AND object_name LIKE 'SYS_');
 ```
