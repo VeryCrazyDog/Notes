@@ -222,7 +222,7 @@ WHERE
 
 ## SQL Generation
 
-Generate DROP statement for all objects in database, excluding database links.
+Generate DROP statement for all objects in database, excluding database links
 
 ```sql
 -- Indexes, LOBs, system generated types will be dropped automatically when the related objects are dropped
@@ -236,4 +236,68 @@ FROM user_objects
 WHERE
 	object_type NOT IN ('DATABASE LINK', 'LOB', 'INDEX')
 	AND NOT (object_type = 'TYPE' AND object_name LIKE 'SYS_');
+```
+
+Generate disable constraint SQL statements
+
+```sql
+SELECT
+	'ALTER TABLE "' || c.owner || '"."' || c.table_name || '" DISABLE CONSTRAINT "' || c.constraint_name || '";' AS sql,
+	c.constraint_type
+FROM user_constraints c INNER JOIN user_tables t ON c.table_name = t.table_name
+WHERE
+	c.status = 'ENABLED'
+	AND NOT (t.iot_type IS NOT NULL AND c.constraint_type = 'P')
+	-- Exclude tables used by materialized view
+	AND c.table_name NOT IN (SELECT container_name FROM user_mviews)
+	-- Edit the below condition to exclude any constraints that is not needed
+	AND c.constraint_type IN ('U', 'R', 'P', 'C')
+ORDER BY c.constraint_type DESC;
+```
+
+Generate enable constraint SQL statements for disabled constraints
+
+```sql
+SELECT
+	'ALTER TABLE "' || c.owner || '"."' || c.table_name || '" ENABLE CONSTRAINT "' || c.constraint_name || '";' AS sql,
+	c.constraint_type
+FROM user_constraints c INNER JOIN user_tables t ON c.table_name = t.table_name
+WHERE c.status = 'DISABLED'
+ORDER BY c.constraint_type;
+```
+
+Truncate all tables
+
+```sql
+SELECT
+	'ALTER TABLE "' || c.owner || '"."' || c.table_name || '" DISABLE CONSTRAINT "' || c.constraint_name || '";' AS sql,
+	1 AS type_order,
+	c.constraint_type
+FROM user_constraints c INNER JOIN user_tables t ON c.table_name = t.table_name
+WHERE
+	c.status = 'ENABLED'
+	AND NOT (t.iot_type IS NOT NULL AND c.constraint_type = 'P')
+	-- Exclude tables used by materialized view
+	AND c.table_name NOT IN (SELECT container_name FROM user_mviews)
+	AND c.constraint_type = 'R'
+UNION ALL
+SELECT
+	'TRUNCATE TABLE ' || table_name || ';' AS sql,
+	2,
+	''
+FROM user_tables
+WHERE table_name NOT IN (SELECT container_name FROM user_mviews)
+UNION ALL
+SELECT
+	'ALTER TABLE "' || c.owner || '"."' || c.table_name || '" ENABLE CONSTRAINT "' || c.constraint_name || '";' AS sql,
+	3 AS type_order,
+	c.constraint_type
+FROM user_constraints c INNER JOIN user_tables t ON c.table_name = t.table_name
+WHERE
+	c.status = 'ENABLED'
+	AND NOT (t.iot_type IS NOT NULL AND c.constraint_type = 'P')
+	-- Exclude tables used by materialized view
+	AND c.table_name NOT IN (SELECT container_name FROM user_mviews)
+	AND c.constraint_type = 'R'
+ORDER BY 2, 3 DESC;
 ```

@@ -38,3 +38,27 @@ Print summary information about total swap space usage
 ```sh
 swap -s
 ```
+
+Print list of process with non-truncated command, only applicable on processes which has access
+
+```sh
+/usr/ucb/ps -alxwww
+```
+
+Print process tree
+
+```sh
+ptree
+```
+
+Print process tree with full branch if any process in a branch is run by `root`
+
+```sh
+ptree root
+```
+
+Find process start time for pid `123`
+
+```sh
+ls -l /proc | grep 123
+```
