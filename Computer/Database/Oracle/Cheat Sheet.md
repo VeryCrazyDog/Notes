@@ -146,7 +146,8 @@ SELECT
 	l.os_user_name,
 	l.process,
 	o.name
-FROM gv$locked_object l
+FROM
+	gv$locked_object l
 	INNER JOIN gv$session s ON s.inst_id = l.inst_id AND s.sid = l.session_id
 	INNER JOIN sys.obj$ o ON o."OBJ#" = l.object_id
 WHERE l.oracle_username = USER;
@@ -155,11 +156,12 @@ WHERE l.oracle_username = USER;
 Find the object accessing by user
 
 ```sql
--- This SQL will takes some time when criteria is given to gv$access
+-- This SQL might takes some time when criteria is given to gv$access
 SELECT s.inst_id, s.sid, s."SERIAL#", s.status, s.username, s.machine, a.owner, a.object, a.type
 FROM gv$session s INNER JOIN gv$access a
 ON s.inst_id = a.inst_id AND s.sid = a.sid
-WHERE s.username = USER;
+WHERE s.username = USER
+ORDER BY 1, 2, 3;
 ```
 
 Find sessions that are not idle and waiting indefinitely
@@ -205,7 +207,7 @@ SELECT
 	b.data_precision AS b_data_precision,
 	a.nullable AS a_nullable,
 	b.nullable AS b_nullable
-FROM ALL_TAB_COLUMNS a INNER JOIN ALL_TAB_COLUMNS b
+FROM all_tab_columns a INNER JOIN all_tab_columns b
 	ON
 		a.owner = b.owner
 		AND SUBSTR(a.table_name, 0, 3) || 'LOG_' || SUBSTR(a.table_name, 4) = b.table_name
@@ -225,7 +227,7 @@ WHERE
 Generate DROP statement for all objects in database, excluding database links
 
 ```sql
--- Indexes, LOBs, system generated types will be dropped automatically when the related objects are dropped
+-- LOBs, indexes, triggers, package bodies, system generated types will be dropped automatically when the related objects are dropped
 SELECT
 	'DROP ' || object_type || ' ' || object_name ||
 		CASE
@@ -234,7 +236,8 @@ SELECT
 		END || ';' AS sql
 FROM user_objects
 WHERE
-	object_type NOT IN ('DATABASE LINK', 'LOB', 'INDEX')
+	object_type NOT IN ('DATABASE LINK', 'LOB', 'INDEX', 'TRIGGER', 'PACKAGE BODY')
+	AND NOT (object_type = 'TABLE' AND object_name IN (SELECT container_name FROM user_mviews))
 	AND NOT (object_type = 'TYPE' AND object_name LIKE 'SYS_');
 ```
 
@@ -266,7 +269,21 @@ WHERE c.status = 'DISABLED'
 ORDER BY c.constraint_type;
 ```
 
-Truncate all tables
+Generate disable trigger SQL statements in table level
+
+```sql
+SELECT
+	'ALTER TABLE "' || table_owner || '"."' || table_name || '" DISABLE ALL TRIGGERS;' AS sql
+FROM (
+	SELECT DISTINCT table_owner, table_name
+	FROM user_triggers
+	WHERE
+		base_object_type = 'TABLE'
+		AND status = 'ENABLED'
+) ut;
+```
+
+Generate SQL to truncate all tables
 
 ```sql
 SELECT
@@ -300,4 +317,13 @@ WHERE
 	AND c.table_name NOT IN (SELECT container_name FROM user_mviews)
 	AND c.constraint_type = 'R'
 ORDER BY 2, 3 DESC;
+```
+
+Generate SQL to handle DBMS jobs
+
+```sql
+SELECT
+	'EXECUTE DBMS_JOB.BROKEN(' || job || ', TRUE);' AS broken_sql,
+	'EXECUTE DBMS_JOB.REMOVE(' || job || ');' AS remove_sql
+FROM user_jobs;
 ```
