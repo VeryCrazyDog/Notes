@@ -167,7 +167,7 @@ ORDER BY 1, 2, 3;
 Find sessions that are not idle and waiting indefinitely
 
 ```sql
-SELECT sid, "SERIAL#", username, command, schemaname, osuser, machine, logon_time, event, wait_class, state
+SELECT sid, "SERIAL#", username, command, schemaname, osuser, machine, TO_CHAR(logon_time, 'YYYY-MM-DD HH24:MI:SS'), event, wait_class, state
 FROM v$session
 WHERE username = USER AND wait_class <> 'Idle' AND time_remaining_micro = -1;
 ```
