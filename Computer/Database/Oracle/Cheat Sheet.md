@@ -145,11 +145,12 @@ SELECT
 	s.machine,
 	l.os_user_name,
 	l.process,
-	o.name
+	o.object_name,
+	o.object_type
 FROM
 	gv$locked_object l
 	INNER JOIN gv$session s ON s.inst_id = l.inst_id AND s.sid = l.session_id
-	INNER JOIN sys.obj$ o ON o."OBJ#" = l.object_id
+	INNER JOIN dba_objects o ON o.object_id = l.object_id
 WHERE l.oracle_username = USER;
 ```
 
@@ -164,10 +165,40 @@ WHERE s.username = USER
 ORDER BY 1, 2, 3;
 ```
 
+Find sessions that has been running for at least 1 day
+
+```sql
+SELECT
+	sid,
+	"SERIAL#",
+	username,
+	command,
+	schemaname,
+	osuser,
+	machine,
+	TO_CHAR(logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
+	last_call_et
+FROM v$session
+WHERE username = USER AND status = 'ACTIVE' AND last_call_et >= 60 * 60 * 24;
+```
+
+
 Find sessions that are not idle and waiting indefinitely
 
 ```sql
-SELECT sid, "SERIAL#", username, command, schemaname, osuser, machine, TO_CHAR(logon_time, 'YYYY-MM-DD HH24:MI:SS'), event, wait_class, state
+-- Not supported on Oracle Database 9i
+SELECT
+	sid,
+	"SERIAL#",
+	username,
+	command,
+	schemaname,
+	osuser,
+	machine,
+	TO_CHAR(logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
+	event,
+	wait_class,
+	state
 FROM v$session
 WHERE username = USER AND wait_class <> 'Idle' AND time_remaining_micro = -1;
 ```
