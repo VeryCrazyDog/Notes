@@ -144,6 +144,7 @@ SELECT
 	l.oracle_username,
 	s.machine,
 	l.os_user_name,
+	TO_CHAR(logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
 	l.process,
 	o.object_name,
 	o.object_type
