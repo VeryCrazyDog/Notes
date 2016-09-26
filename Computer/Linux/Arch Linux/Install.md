@@ -12,7 +12,7 @@ This guide assumes the following configuration will be used
 * One single hard disk
 * Using GPT partition
 * One single root partition as partition scheme
-* 4GB swap file will be used instead of swap partition
+* Swap file will be used instead of swap partition
 * Minimal package installation
 * With hostname `archlinux`
 * Using Hong Kong time zone
@@ -105,8 +105,6 @@ Enable swap file on boot
 ```
 # systemctl enable systemd-swap
 ```
-
-Update swap file location, replace `/mnt/swapfile` by `/swapfile` in `/etc/fstab`
 
 Set the time zone
 
