@@ -27,20 +27,20 @@ Configure VM with the following options
 
 Connect to the Internet and verify a connection is established by using `ping`
 
-```
-# ping archlinux.org
+```sh
+ping archlinux.org
 ```
 
 Idenify the hard disk
 
-```
-# fdisk -l
+```sh
+fdisk -l
 ```
 
 Assuming the hard disk is `/dev/sdx`, partition the disk
 
-```
-# gdisk /dev/sdx
+```sh
+gdisk /dev/sdx
 ```
 
 At the `gdisk` prompt
@@ -54,88 +54,88 @@ At the `gdisk` prompt
 
 Format the root partition
 
-```
-# mkfs.ext4 /dev/sdx2
+```sh
+mkfs.ext4 /dev/sdx2
 ```
 
 Mount the file system
 
-```
-# mount /dev/sdx2 /mnt
+```sh
+mount /dev/sdx2 /mnt
 ```
 
 ### Installation
 
 Install the base packages
 
-```
-# pacstrap /mnt base
+```sh
+pacstrap /mnt base
 ```
 
 ### Configure the system
 
 Generate an `fstab` file
 
-```
-# genfstab -U /mnt >> /mnt/etc/fstab
+```sh
+genfstab -U /mnt >> /mnt/etc/fstab
 ```
 
 Change root into new system
 
-```
-# arch-chroot /mnt
+```sh
+arch-chroot /mnt
 ```
 
 Optionally install `vim` text editor
 
-```
-# pacman -S vim
+```sh
+pacman -S vim
 ```
 
 Install `systemd-swap` package
 
-```
-# pacman -S systemd-swap
+```sh
+pacman -S systemd-swap
 ```
 
 Uncomment the lines containing `swapf` in the *swap file part* section of `/etc/systemd-swap.conf`.
 
 Enable swap file on boot
 
-```
-# systemctl enable systemd-swap
+```sh
+systemctl enable systemd-swap
 ```
 
 Set the time zone
 
-```
-# ln -s /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime
+```sh
+ln -s /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime
 ```
 
 Generate `/etc/adjtime`
 
-```
-# hwclock --systohc --utc
+```sh
+hwclock --systohc --utc
 ```
 
 Uncomment `en_US.UTF-8 UTF-8` and other needed localizations in `/etc/locale.gen`
 
 Generate locale
 
-```
-# locale-gen
+```sh
+locale-gen
 ```
 
 Set `LANG` variable
 
-```
-# echo LANG=en_US.UTF-8 > /etc/locale.conf
+```sh
+echo LANG=en_US.UTF-8 > /etc/locale.conf
 ```
 
 Create hostname file
 
-```
-# echo archlinux > /etc/hostname
+```sh
+echo archlinux > /etc/hostname
 ```
 
 Optionally adding a [matching entry](https://wiki.archlinux.org/index.php/Network_configuration#Local_network_hostname_resolution) to `/etc/hosts`. For a system with a permanent IP address, that permanent IP address should be used instead of `127.0.1.1`.
@@ -146,39 +146,90 @@ Optionally adding a [matching entry](https://wiki.archlinux.org/index.php/Networ
 
 Optionally set the root password
 
-```
-# passwd
+```sh
+passwd
 ```
 
 [Install](https://wiki.archlinux.org/index.php/GRUB#Installation) `grub` package
 
-```
-# pacman -S grub
+```sh
+pacman -S grub
 ```
 
 If you have an Intel CPU, install the `intel-ucode` package
 
-```
-# pacman -S intel-ucode
+```sh
+pacman -S intel-ucode
 ```
 
 [Install boot loader](https://wiki.archlinux.org/index.php/GRUB#Install_to_disk) `GRUB` and additionally [enable microcode updates](https://wiki.archlinux.org/index.php/Microcode#Enabling_Intel_microcode_updates)
 
-```
-# grub-install --target=i386-pc /dev/sdx
-# grub-mkconfig -o /boot/grub/grub.cfg
+```sh
+grub-install --target=i386-pc /dev/sdx
+grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
 ### Reboot
 
 Exit chroot environment
 
-```
-# exit
+```sh
+exit
 ```
 
 Restart the machine
 
+```sh
+reboot
 ```
-# reboot
+
+## Configure Network Device
+
+Identify the network device name
+
+```sh
+ip addr
+```
+
+Assume the network device is `ethX`, create network files for the required network devices at `/etc/systemd/network/ethX.network`. For DHCP, use the following content
+
+```ini
+[Match]
+Name=ethX
+
+[Network]
+DHCP=both
+```
+
+For static IP, use the content similiar to the following
+
+```ini
+[Match]
+Name=ethX
+
+[Network]
+Address=192.168.1.11/24
+Gateway=192.168.1.1
+DNS=8.8.8.8
+DNS=8.8.4.4
+```
+
+Enable using DNS from DHCP
+
+```sh
+ln -s /usr/lib/systemd/resolv.conf /etc/resolv.conf
+```
+
+Enable required services
+
+```sh
+systemctl enable systemd-networkd
+systemctl enable systemd-resolved
+```
+
+Start required services
+
+```sh
+systemctl start systemd-networkd
+systemctl start systemd-resolved
 ```
