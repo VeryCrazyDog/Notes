@@ -150,6 +150,18 @@ Optionally set the root password
 passwd
 ```
 
+Optionally install SSH client and server
+
+```sh
+pacman -S openssh
+```
+
+Optioanlly enable SSH server
+
+```sh
+systemctl enable sshd
+```
+
 [Install](https://wiki.archlinux.org/index.php/GRUB#Installation) `grub` package
 
 ```sh
@@ -183,7 +195,7 @@ Restart the machine
 reboot
 ```
 
-## Configure Network Device
+## Configure Network Device using systemd-networkd
 
 Identify the network device name
 
@@ -217,7 +229,8 @@ DNS=8.8.4.4
 Enable using DNS from DHCP
 
 ```sh
-ln -s /usr/lib/systemd/resolv.conf /etc/resolv.conf
+rm /etc/resolv.conf
+ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
 ```
 
 Enable required services
