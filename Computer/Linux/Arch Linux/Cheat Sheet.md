@@ -80,3 +80,18 @@ Start service
 ```sh
 systemctl start service_name
 ```
+
+List boot ID in systemd journal
+```sh
+journalctl --list-boot
+```
+
+Check log for last boot with priority higher than error or above in systemd journal
+```sh
+journalctl -p 3 -xb -0
+```
+
+Check log for current boot with priority higher than error or above in systemd journal
+```sh
+journalctl -p 3 -xb
+```
