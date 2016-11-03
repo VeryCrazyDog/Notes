@@ -133,7 +133,25 @@ ORDER BY gigabytes DESC;
 
 ## Session Information
 
-Find locked objects and their respective session
+Find locks, their related objects and respective sessions
+
+```sql
+SELECT
+	l.inst_id,
+	l.sid,
+	s."SERIAL#",
+	s.status,
+	s.username,
+	s.machine,
+	s.osuser,
+	TO_CHAR(s.logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
+	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(s.sid) || ',' || TO_CHAR(s."SERIAL#") || ''';' AS ks_sql
+FROM
+	gv$lock l
+	INNER JOIN gv$session s ON s.inst_id = l.inst_id AND s.sid = l.sid;
+```
+
+Find locked objects and their respective sessions
 
 ```sql
 SELECT
@@ -144,7 +162,7 @@ SELECT
 	l.oracle_username,
 	s.machine,
 	l.os_user_name,
-	TO_CHAR(logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
+	TO_CHAR(s.logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
 	l.process,
 	o.object_name,
 	o.object_type
