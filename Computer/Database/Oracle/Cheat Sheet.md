@@ -145,10 +145,15 @@ SELECT
 	s.machine,
 	s.osuser,
 	TO_CHAR(s.logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
+	o.object_name,
 	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(s.sid) || ',' || TO_CHAR(s."SERIAL#") || ''';' AS ks_sql
 FROM
 	gv$lock l
-	INNER JOIN gv$session s ON s.inst_id = l.inst_id AND s.sid = l.sid;
+	INNER JOIN gv$session s ON s.inst_id = l.inst_id AND s.sid = l.sid
+	INNER JOIN user_objects o ON l.id1 = o.object_id
+WHERE
+	l.type = 'TO'
+	AND o.object_name LIKE '%';
 ```
 
 Find locked objects and their respective sessions
@@ -188,6 +193,7 @@ Find sessions that has been running for at least 1 day
 
 ```sql
 SELECT
+	inst_id,
 	sid,
 	"SERIAL#",
 	username,
@@ -196,8 +202,9 @@ SELECT
 	osuser,
 	machine,
 	TO_CHAR(logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
-	last_call_et
-FROM v$session
+	last_call_et,
+	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(sid) || ',' || TO_CHAR("SERIAL#") || ''';' AS ks_sql
+FROM gv$session
 WHERE username = USER AND status = 'ACTIVE' AND last_call_et >= 60 * 60 * 24;
 ```
 
@@ -228,7 +235,8 @@ WHERE username = USER AND wait_class <> 'Idle' AND time_remaining_micro = -1;
 Mark DBMS JOB with JOB ID `777` as broken
 
 ```sql
-DBMS_JOB.BROKEN(777, TRUE);
+BEGIN DBMS_JOB.BROKEN(777, TRUE); END;
+/
 ```
 
 Kill session with session ID `SESSION_ID` equal to `777` and serial number `SERIAL#` equal to `1234` immediately
