@@ -282,6 +282,30 @@ WHERE
 
 ## SQL Generation
 
+Generate SQL to query number of records for all tables
+
+```sql
+SET DEFINE OFF;
+SELECT
+	'SELECT *' || CHR(10) || 'FROM (' || CHR(10) || CHR(9) ||
+	REGEXP_REPLACE(
+		REPLACE(
+			XMLAGG(
+				XMLELEMENT(E, sql, CHR(10) || CHR(9) || 'UNION' || CHR(10) || CHR(9))
+			).EXTRACT('//text()').GetClobVal(),
+			'&apos;',
+			''''
+		),
+		CHR(10) || CHR(9) || 'UNION' || CHR(10) || CHR(9) || '$',
+		''
+	) || CHR(10) || ') t' || CHR(10) || 'ORDER BY count DESC;' AS result
+FROM (
+	SELECT
+		'SELECT ''' || table_name || ''' AS table_name, COUNT(*) AS count FROM ' || table_name AS sql
+	FROM user_tables
+) t;
+```
+
 Generate DROP statement for all objects in database, excluding database links
 
 ```sql
