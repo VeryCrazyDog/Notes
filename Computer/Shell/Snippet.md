@@ -18,3 +18,11 @@ Case sensitive replace of string `foo` with `bar` in file `filename.txt`
 ```sh
 sed -i -e 's/foo/bar/g' filename.txt
 ```
+
+A function for backup backup purpose
+
+```sh
+mkbak() {
+	sudo cp -pv "$1" "$1.$(date +"%Y%m%d%H%M%S").bak"
+}
+```
