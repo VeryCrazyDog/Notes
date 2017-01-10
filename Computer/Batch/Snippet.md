@@ -34,3 +34,13 @@ To redirect both stdout and stderr to the same file
 ```bat
 dir file.xxx 1> output.msg 2>&1
 ```
+
+Create a dummy file with specific size in Windows
+
+```bat
+rem Create 1MB file with filename 'filename.dat'
+fsutil file createnew filename.dat 1048576
+
+rem Create 1GB file with filename 'filename.dat'
+fsutil file createnew filename.dat 1073741824
+```
