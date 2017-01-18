@@ -98,7 +98,7 @@ Install `systemd-swap` package
 pacman -S systemd-swap
 ```
 
-Uncomment the lines containing `swapf` in the *swap file part* section of `/etc/systemd-swap.conf`.
+Set the line `swapfu_enabled=0` to `swapfu_enabled=1` in file `/etc/systemd/swap.conf`.
 
 Enable swap file on boot
 
@@ -193,6 +193,14 @@ Restart the machine
 
 ```sh
 reboot
+```
+
+### Checking
+
+Check if swap file is active
+
+```sh
+free
 ```
 
 ## Configure Network Device using systemd-networkd
