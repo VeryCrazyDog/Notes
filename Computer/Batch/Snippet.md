@@ -17,30 +17,26 @@ set NOW=%NOW:~0,4%-%NOW:~4,2%-%NOW:~6,2% %NOW:~8,2%:%NOW:~10,2%:%NOW:~12,6%
 echo Local date is [%NOW%]
 ```
 
-To redirect the stderr to NUL
+Template for launching program
 
 ```bat
-dir file.xxx 2> nul
-```
+@rem Do not use "echo off" to not affect any child calls
 
-To redirect the stdout and stderr to different files
+@rem Set environment variables local to this batch file
+@setlocal
 
-```bat
-dir file.xxx > output.msg 2> output.err
-```
+@rem Reset to Windows 7 default environment variables
+@set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\
+@set CLASSPATH=
 
-To redirect both stdout and stderr to the same file
+@rem Configure additional environment variables
+@set PATH=%PATH%
 
-```bat
-dir file.xxx 1> output.msg 2>&1
-```
+@rem Switch to the program start location
+@if not exist "%HOME%" @set HOME=%HOMEDRIVE%%HOMEPATH%
+@if not exist "%HOME%" @set HOME=%USERPROFILE%
+@cd /d %HOME%
 
-Create a dummy file with specific size in Windows
-
-```bat
-rem Create 1MB file with filename 'filename.dat'
-fsutil file createnew filename.dat 1048576
-
-rem Create 1GB file with filename 'filename.dat'
-fsutil file createnew filename.dat 1073741824
+@rem Launch the program
+@start %COMSPEC%
 ```
