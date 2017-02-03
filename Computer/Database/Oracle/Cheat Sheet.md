@@ -405,7 +405,7 @@ Generate SQL to handle DBMS jobs
 
 ```sql
 SELECT
-	'EXECUTE DBMS_JOB.BROKEN(' || job || ', TRUE);' AS broken_sql,
+	CASE WHEN broken = 'N' THEN 'EXECUTE DBMS_JOB.BROKEN(' || job || ', TRUE);' ELSE '' END AS broken_sql,
 	'EXECUTE DBMS_JOB.REMOVE(' || job || ');' AS remove_sql
 FROM user_jobs;
 ```
