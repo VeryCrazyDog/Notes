@@ -15,7 +15,7 @@ mkbak() {
 }
 ```
 
-PS1 prompt for different environment with style
+PS1 prompt for different environment with style, inspired by https://gitlab.com/gitlab-com/infrastructure/issues/1094
 
 ```sh
 # For development
@@ -28,7 +28,7 @@ PS1='\[\e[0;1;32m\]\u\[\e[0;1m\]@\[\e[1;33m\]\h\[\e[0m\] \[\e[1;34m\]\w\$\[\e[0m
 PS1='\[\e[0;1;32m\]\u\[\e[0;1m\]@\[\e[1;4;31m\]\h\[\e[0m\] \[\e[1;34m\]\w\$\[\e[0m\] '
 ```
 
-Disable `rm` by alias
+Disable `rm` by alias, inspired by https://gitlab.com/gitlab-com/infrastructure/issues/1094
 
 ```sh
 # Prevent `rm`
