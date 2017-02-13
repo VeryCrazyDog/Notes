@@ -7,18 +7,6 @@ if [ "$(id -u)" != "0" ]; then
 fi
 ```
 
-Create a file with timestamp as part of the filename
-
-```sh
-touch test_file_$(date +'%Y%m%d%H%M%S')
-```
-
-Case sensitive replace of string `foo` with `bar` in file `filename.txt`
-
-```sh
-sed -i -e 's/foo/bar/g' filename.txt
-```
-
 A function for backup backup purpose
 
 ```sh
@@ -27,20 +15,24 @@ mkbak() {
 }
 ```
 
-Send test email using telnet
+PS1 prompt for different environment with style
 
 ```sh
-cat <<EOT > mail.txt
-HELO smtpserver.com
-mail from: you@sender.com
-rcpt to: friend@recipient.com
-data
-subject: Test Email $(date +"%Y%m%d%H%M%S")
+# For development
+PS1='\[\e[0;1;32m\]\u@\h\[\e[0m\] \[\e[1;34m\]\w\$\[\e[0m\] '
 
-This is a test email from $(hostname).
-.
-quit
-EOT
-cat mail.txt | telnet smtpserver.com 25
-rm mail.txt
+# For UAT
+PS1='\[\e[0;1;32m\]\u\[\e[0;1m\]@\[\e[1;33m\]\h\[\e[0m\] \[\e[1;34m\]\w\$\[\e[0m\] '
+
+# For production
+PS1='\[\e[0;1;32m\]\u\[\e[0;1m\]@\[\e[1;4;31m\]\h\[\e[0m\] \[\e[1;34m\]\w\$\[\e[0m\] '
+```
+
+Disable `rm` by alias
+
+```sh
+# Prevent `rm`
+alias rm='echo "You are in production environment - rm is disabled, use trash or /bin/rm instead."'
+# Prevent `sudo rm`
+alias sudo='sudo '
 ```
