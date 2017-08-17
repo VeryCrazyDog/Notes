@@ -10,6 +10,8 @@ CREATE TABLE students (
 	gender CHAR NOT NULL,
 	birthday DATE,
 	version INT NOT NULL DEFAULT 1,
+	created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	modified_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	INDEX ix_students_name (name)
 );
 
@@ -18,6 +20,8 @@ CREATE TABLE teachers (
 	name VARCHAR(50) NOT NULL DEFAULT '',
 	code VARCHAR(50) NOT NULL DEFAULT '',
 	gender CHAR NOT NULL,
+	created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	modified_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	INDEX ix_teachers_name (name)
 );
 
@@ -26,15 +30,19 @@ CREATE TABLE courses (
 	name VARCHAR(50) NOT NULL DEFAULT '',
 	location VARCHAR(50) NOT NULL DEFAULT '',
 	teacher_id INT,
+	created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	modified_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	INDEX ix_courses_name (name),
 	CONSTRAINT fk_courses_teachers_id FOREIGN KEY (teacher_id) REFERENCES teachers(id)
 );
 
 CREATE TABLE students_courses (
-	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	student_id INT NOT NULL,
 	course_id INT NOT NULL,
-	CONSTRAINT uk_students_courses UNIQUE KEY (student_id, course_id),
+	created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	modified_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (student_id, course_id),
+	CONSTRAINT uk_students_courses UNIQUE KEY (course_id, student_id),
 	CONSTRAINT fk_students_courses_students_id FOREIGN KEY (student_id) REFERENCES students(id),
 	CONSTRAINT fk_students_courses_courses_id FOREIGN KEY (course_id) REFERENCES courses(id)
 );
@@ -77,19 +85,19 @@ INSERT courses (id, name, location, teacher_id) VALUES
 	(9, 'Accounting', 'Lecture Theatre E', 8),
 	(10, 'History', 'Room 5', NULL);
 
-INSERT students_courses(id, student_id, course_id) VALUES
-	(1, 1, 1),
-	(2, 1, 2),
-	(3, 1, 3),
-	(4, 2, 2),
-	(5, 2, 4),
-	(6, 5, 1),
-	(7, 5, 4),
-	(8, 5, 8),
-	(9, 5, 9),
-	(10, 5, 10),
-	(11, 8, 3),
-	(12, 9, 3),
-	(13, 9, 8),
-	(14, 12, 3),
-	(15, 12, 8);
+INSERT students_courses(student_id, course_id) VALUES
+	(1, 1),
+	(1, 2),
+	(1, 3),
+	(2, 2),
+	(2, 4),
+	(5, 1),
+	(5, 4),
+	(5, 8),
+	(5, 9),
+	(5, 10),
+	(8, 3),
+	(9, 3),
+	(9, 8),
+	(12, 3),
+	(12, 8);
