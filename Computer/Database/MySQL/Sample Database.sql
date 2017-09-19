@@ -59,7 +59,8 @@ INSERT students (id, name, code, gender, birthday, version) VALUES
 	(9, 'Ivan', 'student9', 'M', '1982-09-09', 3),
 	(10, 'Janice', 'student10', 'F', '1983-10-10', 3),
 	(11, 'Keith', 'student11', 'M', '1983-11-11', 4),
-	(12, 'Ling', 'student12', 'F', '1982-12-12', 4);
+	(12, 'Ling', 'student12', 'F', '1982-12-12', 4),
+	(13, 'April', 'student13', 'F', '1980-01-13', 2);
 
 INSERT teachers (id, name, code, gender) VALUES
 	(1, 'Andrew', 'teacher1', 'M'),
