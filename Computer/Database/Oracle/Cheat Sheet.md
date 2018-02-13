@@ -182,9 +182,18 @@ Find the object accessing by user
 
 ```sql
 -- This SQL might takes some time when criteria is given to gv$access
-SELECT s.inst_id, s.sid, s."SERIAL#", s.status, s.username, s.machine, a.owner, a.object, a.type
-FROM gv$session s INNER JOIN gv$access a
-ON s.inst_id = a.inst_id AND s.sid = a.sid
+SELECT
+	s.inst_id,
+	s.sid,
+	s."SERIAL#",
+	s.status,
+	s.username,
+	s.machine,
+	a.owner,
+	a.object,
+	a.type,
+	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(s.sid) || ',' || TO_CHAR(s."SERIAL#") || ''';' AS ks_sql
+FROM gv$session s INNER JOIN gv$access a ON s.inst_id = a.inst_id AND s.sid = a.sid
 WHERE s.username = USER
 ORDER BY 1, 2, 3;
 ```
