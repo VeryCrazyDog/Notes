@@ -198,7 +198,7 @@ WHERE s.username = USER
 ORDER BY 1, 2, 3;
 ```
 
-Find sessions that has been running for at least 1 day
+Find sessions which has been running for at least 1 day under the current logged in user
 
 ```sql
 SELECT
@@ -217,8 +217,7 @@ FROM gv$session
 WHERE username = USER AND status = 'ACTIVE' AND last_call_et >= 60 * 60 * 24;
 ```
 
-
-Find sessions that are not idle and waiting indefinitely
+Find sessions which are not idle and waiting indefinitely
 
 ```sql
 -- Not supported on Oracle Database 9i
@@ -237,6 +236,27 @@ SELECT
 FROM v$session
 WHERE username = USER AND wait_class <> 'Idle' AND time_remaining_micro = -1;
 ```
+
+Find sessions which are running DBMS jobs for at least 1 day under the current logged in user
+
+```sql
+SELECT
+	r.job,
+	r.sid,
+	r.last_date,
+	r.last_sec,
+	r.this_date,
+	r.this_sec,
+	j.what,
+	s.last_call_et,
+	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(r.sid) || ',' || TO_CHAR(s."SERIAL#") || ''';' AS ks_sql
+FROM dba_jobs_running r
+	INNER JOIN dba_jobs j ON r.job = j.job
+	INNER JOIN v$session s ON r.sid = s.sid
+WHERE j.schema_user = USER AND s.last_call_et >= 60 * 60 * 24
+ORDER BY r.this_date, r.this_sec;
+```
+
 
 
 # Operation on Database
