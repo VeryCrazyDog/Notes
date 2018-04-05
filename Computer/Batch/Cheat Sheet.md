@@ -13,7 +13,17 @@ dir file.xxx > output.msg 2> output.err
 To redirect both stdout and stderr to the same file
 
 ```bat
+dir file.xxx > output.msg 2>&1
+
 dir file.xxx 1> output.msg 2>&1
+```
+
+To redirect both stdout and stderr to append to the same file
+
+```bat
+dir file.xxx >> output.msg 2>&1
+
+dir file.xxx 1>> output.msg 2>&1
 ```
 
 Create a dummy file with specific size in Windows
