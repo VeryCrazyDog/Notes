@@ -133,52 +133,60 @@ ORDER BY gigabytes DESC;
 
 ## Session Information
 
-Find locks, their related objects and respective sessions
+Find locks, their related objects and respective sessions under current logged in user
 
 ```sql
 SELECT
 	l.inst_id,
 	l.sid,
 	s."SERIAL#",
-	s.status,
-	s.username,
-	s.machine,
 	s.osuser,
+	s.machine,
+	s.username,
 	TO_CHAR(s.logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
+	o.owner,
 	o.object_name,
-	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(s.sid) || ',' || TO_CHAR(s."SERIAL#") || ''';' AS ks_sql
+	o.object_type,
+	s.status,
+	s.last_call_et,
+	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(s.sid) || ',' || TO_CHAR(s."SERIAL#") || ''' IMMEDIATE;' AS ks_sql
 FROM
 	gv$lock l
 	INNER JOIN gv$session s ON s.inst_id = l.inst_id AND s.sid = l.sid
-	INNER JOIN user_objects o ON l.id1 = o.object_id
+	INNER JOIN dba_objects o ON l.id1 = o.object_id
 WHERE
 	l.type = 'TO'
-	AND o.object_name LIKE '%';
+	AND s.username = USER
+	AND o.object_name LIKE '%'
+ORDER BY o.owner, o.object_name, l.inst_id, l.sid;
 ```
 
-Find locked objects and their respective sessions
+Find locked objects and their respective sessions under current logged in user
 
 ```sql
 SELECT
 	l.inst_id,
 	l.session_id,
 	s."SERIAL#",
-	s.status,
-	l.oracle_username,
-	s.machine,
 	l.os_user_name,
+	s.machine,
+	l.oracle_username,
 	TO_CHAR(s.logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
-	l.process,
+	o.owner,
 	o.object_name,
-	o.object_type
+	o.object_type,
+	s.status,
+	s.last_call_et,
+	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(s.sid) || ',' || TO_CHAR(s."SERIAL#") || ''' IMMEDIATE;' AS ks_sql
 FROM
 	gv$locked_object l
 	INNER JOIN gv$session s ON s.inst_id = l.inst_id AND s.sid = l.session_id
 	INNER JOIN dba_objects o ON o.object_id = l.object_id
-WHERE l.oracle_username = USER;
+WHERE l.oracle_username = USER
+ORDER BY o.owner, o.object_name, l.inst_id, l.session_id;
 ```
 
-Find the object accessing by user
+Find the object accessing by current logged in user in the current schema
 
 ```sql
 -- This SQL might takes some time when criteria is given to gv$access
@@ -186,16 +194,19 @@ SELECT
 	s.inst_id,
 	s.sid,
 	s."SERIAL#",
-	s.status,
-	s.username,
+	s.osuser,
 	s.machine,
+	s.username,
+	TO_CHAR(s.logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
 	a.owner,
 	a.object,
 	a.type,
-	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(s.sid) || ',' || TO_CHAR(s."SERIAL#") || ''';' AS ks_sql
+	s.status,
+	s.last_call_et,
+	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(s.sid) || ',' || TO_CHAR(s."SERIAL#") || ''' IMMEDIATE;' AS ks_sql
 FROM gv$session s INNER JOIN gv$access a ON s.inst_id = a.inst_id AND s.sid = a.sid
 WHERE s.username = USER
-ORDER BY 1, 2, 3;
+ORDER BY a.owner, a.object, s.inst_id, s.sid;
 ```
 
 Find sessions which has been running for at least 1 day under the current logged in user
@@ -205,56 +216,77 @@ SELECT
 	inst_id,
 	sid,
 	"SERIAL#",
-	username,
-	command,
-	schemaname,
 	osuser,
 	machine,
+	username,
 	TO_CHAR(logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
+	schemaname,
+	COALESCE(
+		(SELECT command_name FROM v$sqlcommand WHERE command_type = command),
+		TO_CHAR(command)
+	) AS command,
+	status,
 	last_call_et,
-	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(sid) || ',' || TO_CHAR("SERIAL#") || ''';' AS ks_sql
+	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(sid) || ',' || TO_CHAR("SERIAL#") || ''' IMMEDIATE;' AS ks_sql
 FROM gv$session
-WHERE username = USER AND status = 'ACTIVE' AND last_call_et >= 60 * 60 * 24;
+WHERE username = USER AND status = 'ACTIVE' AND last_call_et >= 60 * 60 * 24
+ORDER BY last_call_et DESC;
 ```
 
-Find sessions which are not idle and waiting indefinitely
+Find sessions which are not idle and waiting indefinitely under the current logged in user
 
 ```sql
 -- Not supported on Oracle Database 9i
 SELECT
+	inst_id,
 	sid,
 	"SERIAL#",
-	username,
-	command,
-	schemaname,
 	osuser,
 	machine,
+	username,
 	TO_CHAR(logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
+	schemaname,
+	COALESCE(
+		(SELECT command_name FROM v$sqlcommand WHERE command_type = command),
+		TO_CHAR(command)
+	) AS command,
+	status,
+	last_call_et,
+	state,
 	event,
 	wait_class,
-	state
-FROM v$session
-WHERE username = USER AND wait_class <> 'Idle' AND time_remaining_micro = -1;
+	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(sid) || ',' || TO_CHAR("SERIAL#") || ''' IMMEDIATE;' AS ks_sql
+FROM gv$session
+WHERE username = USER AND wait_class <> 'Idle' AND time_remaining_micro = -1
+ORDER BY logon_time;
 ```
 
 Find sessions which are running DBMS jobs for at least 1 day under the current logged in user
 
 ```sql
 SELECT
-	r.job,
+	s.inst_id,
 	r.sid,
+	s."SERIAL#",
+	s.osuser,
+	s.machine,
+	s.username,
+	TO_CHAR(s.logon_time, 'YYYY-MM-DD HH24:MI:SS') AS logon_time,
+	j.schema_user,
+	r.job,
 	r.last_date,
 	r.last_sec,
 	r.this_date,
 	r.this_sec,
 	j.what,
+	s.status,
 	s.last_call_et,
-	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(r.sid) || ',' || TO_CHAR(s."SERIAL#") || ''';' AS ks_sql
+	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(r.sid) || ',' || TO_CHAR(s."SERIAL#") || ''' IMMEDIATE;' AS ks_sql
 FROM dba_jobs_running r
 	INNER JOIN dba_jobs j ON r.job = j.job
-	INNER JOIN v$session s ON r.sid = s.sid
+	INNER JOIN gv$session s ON r.sid = s.sid
 WHERE j.schema_user = USER AND s.last_call_et >= 60 * 60 * 24
-ORDER BY r.this_date, r.this_sec;
+ORDER BY s.last_call_et DESC;
 ```
 
 
