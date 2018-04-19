@@ -14,14 +14,18 @@ Send test email using telnet
 
 ```sh
 (
-echo "HELO smtpserver.com";
-echo "mail from: you@sender.com";
-echo "rcpt to: friend@recipient.com";
-echo "data";
-echo "subject: Test Email $(date +"%Y%m%d%H%M%S")";
-echo "";
-echo "This is a test email from $(hostname).";
-echo ".";
-echo "quit";
+cat <<EOT
+HELO HELO smtpserver.com
+mail from: you@sender.com
+rcpt to: friend@recipient.com
+data
+subject: Test Email $(date +"%Y%m%d%H%M%S")
+
+This is a test email from $(hostname).
+.
+quit
+EOT
+# Sleep for 2 seconds to allow server to return response
+sleep 2
 ) | telnet smtpserver.com 25
 ```
