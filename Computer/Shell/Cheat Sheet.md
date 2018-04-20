@@ -15,7 +15,7 @@ Send test email using telnet
 ```sh
 (
 cat <<EOT
-HELO HELO smtpserver.com
+HELO smtpserver.com
 mail from: you@sender.com
 rcpt to: friend@recipient.com
 data
