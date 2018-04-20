@@ -15,10 +15,12 @@ Send test email using telnet
 ```sh
 (
 cat <<EOT
-HELO smtpserver.com
-mail from: you@sender.com
-rcpt to: friend@recipient.com
+helo smtpserver.com
+mail from: sender@example.com
+rcpt to: recipient@example.com
 data
+from: sender@example.com
+to: recipient@example.com
 subject: Test Email $(date +"%Y%m%d%H%M%S")
 
 This is a test email from $(hostname).
