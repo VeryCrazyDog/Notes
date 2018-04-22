@@ -12,9 +12,12 @@ if /I [%RESPONSE%]==[Y] (
 Set date time into variable, independent of the region and date format
 
 ```bat
-for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set NOW=%%j
-set NOW=%NOW:~0,4%-%NOW:~4,2%-%NOW:~6,2% %NOW:~8,2%:%NOW:~10,2%:%NOW:~12,6%
-echo Local date is [%NOW%]
+for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set now=%%j
+set compact=%now:~0,14%
+set readable=%now:~0,4%-%now:~4,2%-%now:~6,2% %now:~8,2%:%now:~10,2%:%now:~12,2%
+echo Local time in different formats are:
+echo [%readable%]
+echo [%compact%]
 ```
 
 Template for launching program
