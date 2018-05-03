@@ -14,3 +14,15 @@ Find the number of cores per CPU (Not available on all Windows version):
 ```bat
 wmic cpu get /format:list | find /i "core"
 ```
+
+# Others
+
+Create a dummy file with specific size
+
+```bat
+rem Create 1MB file with filename 'filename.dat'
+fsutil file createnew filename.dat 1048576
+
+rem Create 1GB file with filename 'filename.dat'
+fsutil file createnew filename.dat 1073741824
+```

@@ -1,5 +1,4 @@
 Yes/No confirmation prompt
-
 ```bat
 set /P RESPONSE=Are you sure? (y/[n]): 
 if /I [%RESPONSE%]==[Y] (
@@ -9,8 +8,17 @@ if /I [%RESPONSE%]==[Y] (
 )
 ```
 
-Set date time into variable, independent of the region and date format
+Set environment variable to folder containing the executing batch file
+```bat
+rem Path without trailing backslash
+set WORKING_HOME=%~dp0
+set WORKING_HOME=%WORKING_HOME:~0,-1%
 
+rem Alternatively use trailing dot semantic, which is equivalent to path without trailing backslash
+set WORKING_HOME=%dp0.
+```
+
+Set date time into variable, independent of the region and date format
 ```bat
 for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set now=%%j
 set compact=%now:~0,14%
@@ -21,7 +29,6 @@ echo [%compact%]
 ```
 
 Template for launching program
-
 ```bat
 @rem Do not use "echo off" to not affect any child calls
 
