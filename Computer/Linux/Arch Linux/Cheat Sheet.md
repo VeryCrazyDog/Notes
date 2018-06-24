@@ -60,6 +60,26 @@ Shows list of files installed by a package
 pacman -Ql package_name
 ```
 
+Rebuilding pacman keyring
+
+```sh
+# Install keyring, either one below
+# x86
+pacman -S archlinux-keyring
+# arm
+pacman -S archlinuxarm-keyring
+
+# Initialize pacman keyring
+pacman-key --init
+
+# Import Arch Linux keyring to pacman keyring
+# x86
+pacman-key --populate archlinux
+# arm
+pacman-key --populate archlinuxarm
+```
+
+
 Show list of files to included in a package
 
 ```sh
@@ -130,6 +150,6 @@ rankmirrors -n 5 /etc/pacman.d/mirrorlist.selection > /etc/pacman.d/mirrorlist.r
 # Remove the mirror used in ranking
 rm /etc/pacman.d/mirrorlist.selection /etc/pacman.d/mirrorlist.rank
 
-# Force pacman to refresh all packages even if they are considered to be up to date to avoid possible issues
+# Force pacman to refresh all packages even if they are considered to be up to date to avoid possible issues due to change in mirror
 pacman -Syyu
 ```
