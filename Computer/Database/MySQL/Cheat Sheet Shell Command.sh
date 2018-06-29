@@ -1,12 +1,3 @@
-# Backup multiple tables from a database
-mysqldump -u user_name -p --lock-tables database_name table_name1 table_name2 table_name3 > backup_file_name.sql
-
-# Backup a database
-mysqldump -u user_name -p --lock-tables database_name > database_name.sql
-
-# Restoring a single table into another database
-mysql -u user_name -p database_name < table_name.sql
-
 # Set login path
 mysql_config_editor set --login-path=<login_path_name> --host=<host> --user=<username> --password
 
