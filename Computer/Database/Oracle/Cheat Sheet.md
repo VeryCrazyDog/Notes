@@ -470,3 +470,18 @@ SELECT
 	'EXECUTE DBMS_JOB.REMOVE(' || job || ');' AS remove_sql
 FROM user_jobs;
 ```
+
+# User and Privilege Management
+
+Query privileges of the current logged in user
+```sql
+-- Query via DBA dictionary views
+SELECT * FROM dba_role_privs WHERE grantee = USER;
+SELECT * FROM dba_sys_privs WHERE grantee = USER;
+SELECT * FROM dba_tab_privs WHERE grantee = USER OR owner = USER;
+
+-- Query via USER dictionary views
+SELECT * FROM user_role_privs;
+SELECT * FROM user_sys_privs;
+SELECT * FROM user_tab_privs;
+```
