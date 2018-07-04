@@ -473,15 +473,36 @@ FROM user_jobs;
 
 # User and Privilege Management
 
-Query privileges of the current logged in user
+Query privileges
 ```sql
--- Query via DBA dictionary views
+-- Query a particular user/role using DBA dictionary views
 SELECT * FROM dba_role_privs WHERE grantee = USER;
 SELECT * FROM dba_sys_privs WHERE grantee = USER;
 SELECT * FROM dba_tab_privs WHERE grantee = USER OR owner = USER;
 
--- Query via USER dictionary views
+-- Query the current logged in user/role
 SELECT * FROM user_role_privs;
 SELECT * FROM user_sys_privs;
 SELECT * FROM user_tab_privs;
+```
+
+Query default tablespaces
+```sql
+-- Query a particular user using DBA dictionary view
+SELECT * FROM dba_users WHERE username = USER;
+
+-- Query the current logged in user
+SELECT * FROM user_users;
+
+-- Query the database default
+SELECT property_name, property_value FROM database_properties WHERE property_name LIKE 'DEFAULT%TABLESPACE';
+```
+
+Query database quota
+```sql
+-- Query a particular user using DBA dictionary view
+SELECT * FROM dba_ts_quotas WHERE username = USER;
+
+-- Query the current logged in user
+SELECT * FROM user_ts_quotas;
 ```
