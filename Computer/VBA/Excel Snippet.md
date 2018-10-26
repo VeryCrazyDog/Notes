@@ -1,4 +1,4 @@
-Save all worksheets in active workbook to CSV format 
+Save all worksheets in active workbook to format *Unicode Text*
 ```vb
 Option Explicit
 
@@ -19,24 +19,27 @@ Function GetFolder() As String
     Set dialog = Nothing
 End Function
 
-Sub SaveWorksheetsAsCsv()
+Sub SaveWorksheetsAsUnicodeText()
     Dim folderPath As String
-    Dim wb As Excel.Workbook
+    Dim inputWb As Excel.Workbook
+    Dim tmpWb as Excel.Workbook
     Dim ws As Excel.Worksheet
-    
-    Set wb = Application.ActiveWorkbook
-    If wb Is Nothing Then
+
+    Set inputWb = Application.ActiveWorkbook
+    If inputWb Is Nothing Then
         MsgBox Prompt:="No active workbook can be used", Buttons:=vbExclamation + vbOKOnly
         Exit Sub
     End If
     folderPath = GetFolder()
     If folderPath <> "" Then
-        For Each ws In wb.Worksheets
+        For Each ws In inputWb.Worksheets
             ws.Copy
-            ActiveWorkbook.SaveAs Filename:=folderPath & "\" & ws.Name & ".csv", FileFormat:=xlCSV
-            ActiveWorkbook.Close SaveChanges:=False
+            Set tmpWb = Application.ActiveWorkbook
+            With tmpWb
+                .SaveAs Filename:=folderPath & "\" & ws.Name & ".txt", FileFormat:=xlUnicodeText
+                .Close SaveChanges:=False
+            End With
         Next
     End If
-
 End Sub
 ```
