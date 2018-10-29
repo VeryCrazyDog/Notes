@@ -19,11 +19,12 @@ Function GetFolder() As String
     Set dialog = Nothing
 End Function
 
-Sub SaveWorksheetsAsUnicodeText()
+Sub SaveWorksheetsAsUnicodeTextWithOptions(indexPrefix As Boolean)
     Dim folderPath As String
     Dim inputWb As Excel.Workbook
-    Dim tmpWb as Excel.Workbook
+    Dim tmpWb As Excel.Workbook
     Dim ws As Excel.Worksheet
+    Dim index As Integer
 
     Set inputWb = Application.ActiveWorkbook
     If inputWb Is Nothing Then
@@ -32,15 +33,25 @@ Sub SaveWorksheetsAsUnicodeText()
     End If
     folderPath = GetFolder()
     If folderPath <> "" Then
+        index = 1
         For Each ws In inputWb.Worksheets
             ws.Copy
             Set tmpWb = Application.ActiveWorkbook
             With tmpWb
-                .SaveAs Filename:=folderPath & "\" & ws.Name & ".txt", FileFormat:=xlUnicodeText
+                .SaveAs Filename:=folderPath & "\" & Format(index, "00") & "-" & ws.Name & ".txt", FileFormat:=xlUnicodeText
                 .Close SaveChanges:=False
             End With
+            index = index + 1
         Next
     End If
+End Sub
+
+Sub SaveWorksheetsAsUnicodeText()
+    SaveWorksheetsAsUnicodeTextWithOptions indexPrefix:=False
+End Sub
+
+Sub SaveWorksheetsAsUnicodeTextIncludeIndexPrefix()
+    SaveWorksheetsAsUnicodeTextWithOptions indexPrefix:=True
 End Sub
 ```
 
