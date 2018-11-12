@@ -62,3 +62,9 @@ Template for launching program
 @rem Launch the program
 @start %COMSPEC%
 ```
+
+Add hidden attribute to folders and files with filename started with dot
+```bat
+for %%f in (.*.*) do attrib +h %%f
+for /d %%f in (.*.*) do attrib +h %%f
+```
