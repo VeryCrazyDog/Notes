@@ -130,6 +130,25 @@ GROUP BY owner
 ORDER BY gigabytes DESC;
 ```
 
+Display tablespace usage
+
+```sql
+SELECT b.tablespace_name, tbs_size SizeMb, a.free_space FreeMb
+FROM
+	(
+		SELECT tablespace_name, round(sum(bytes)/1024/1024 ,2) AS free_space
+		FROM dba_free_space
+		GROUP BY tablespace_name
+	) a,
+	(
+		SELECT tablespace_name, sum(bytes)/1024/1024 AS tbs_size
+		FROM dba_data_files
+		GROUP BY tablespace_name
+	) b
+WHERE a.tablespace_name(+)=b.tablespace_name;
+```
+
+
 
 ## Session Information
 
