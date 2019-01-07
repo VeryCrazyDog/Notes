@@ -11,5 +11,6 @@
 * Visual C++ Redistributable Packages for Visual Studio 2013: [x86 and x64](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
 * Microsoft Visual C++ 2013 Update 5 Redistributable Package: [x86 and x64](https://support.microsoft.com/en-us/help/3179560/update-for-visual-c-2013-and-visual-c-redistributable-package)
 * Visual C++ Redistributable for Visual Studio 2015: [x86 and x64](https://www.microsoft.com/en-us/download/details.aspx?id=48145)
-* Microsoft Visual C++ 2015 Redistributable Update 3: [x86 and x64](https://www.microsoft.com/en-us/download/details.aspx?id=53840)
+* Microsoft Visual C++ 2015 Redistributable Update 3 (14.0.24212.0): [x86 and x64](https://www.microsoft.com/en-us/download/details.aspx?id=53587)
+* Microsoft Visual C++ 2015 Redistributable Update 3 (14.0.24215.1): [x86 and x64](https://www.microsoft.com/en-us/download/details.aspx?id=53840)
 * Microsoft Visual C++ Redistributable for Visual Studio 2017: [x86](https://aka.ms/vs/15/release/vc_redist.x86.exe), [x64](https://aka.ms/vs/15/release/vc_redist.x64.exe)
