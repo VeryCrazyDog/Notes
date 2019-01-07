@@ -1,17 +1,32 @@
 Get source directory of the executing script, reference https://stackoverflow.com/questions/59895/getting-the-source-directory-of-a-bash-script-from-within
 ```sh
-DIR="$(dirname "$(readlink -f "$0")")"
-echo $DIR
+DIR="$(dirname "$(readlink -f "${0}")")"
+echo "$DIR"
 ```
 
 Create a file with timestamp as part of the filename
 ```sh
-touch test_file_$(date +'%Y%m%d%H%M%S')
+touch "test_file_$(date +'%Y%m%d%H%M%S')"
 ```
 
 Case sensitive replace of string `foo` with `bar` in file `filename.txt`
 ```sh
 sed -i -e 's/foo/bar/g' filename.txt
+```
+
+Replace all string by another string in varible using here string
+```sh
+INPUT='Today is ${TODAY_DATE}'
+NEW_VALUE='2019-01-01'
+sed -e "s/\${TODAY_DATE}/${NEW_VALUE}/g" <<< "$INPUT"
+```
+
+Replace all string by another string using shell parameter expansion, not supported by all shell
+```bash
+INPUT='Today is ${TODAY_DATE}'
+NEW_VALUE='2019-01-01'
+RESULT=${INPUT//\$\{TODAY_DATE\}/${NEW_VALUE}}
+echo "$RESULT"
 ```
 
 Send test email using telnet
@@ -33,4 +48,11 @@ EOT
 # Sleep for 2 seconds to allow server to return response
 sleep 2
 ) | telnet smtpserver.com 25
+```
+
+Decimal comparision using `awk`, and print out `1` or `0`
+```sh
+NUMBER1=3
+NUMBER2=4
+awk "BEGIN { print ("${NUMBER1}" < "${NUMBER2}") }"
 ```
