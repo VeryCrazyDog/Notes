@@ -24,22 +24,20 @@ dir file.xxx >> output.msg 2>&1
 dir file.xxx 1>> output.msg 2>&1
 ```
 
-Define function with parameters and return value
+Define function with parameter and return value
 ```bat
 @echo off
-set value1=1
-set value2=2
-echo %value1%
-echo %value2%
-call :SET_VALUE value1,value2
-echo %value1%
-echo %value2%
+set INPUT=1
+echo %INPUT%
+echo "%RESULT%"
+call :SET_VALUE RESULT "%INPUT%"
+echo %INPUT%
+echo %RESULT%
 pause
 exit /b 0
 
 rem Functions
 :SET_VALUE
-set "%~1=5"
-set "%~2=10"
+set "%~1=%~2"
 exit /b 0
 ```
