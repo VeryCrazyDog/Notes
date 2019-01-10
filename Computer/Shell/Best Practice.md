@@ -1,3 +1,12 @@
+Use explicit form of redirection, reference http://wiki.bash-hackers.org/scripting/obsolete
+```sh
+# Explicit redirection for both stdin and stdout, preferred
+echo "Hello World" > filename.txt 2>&1
+
+# Simplified redirection syntax, not preferred
+echo "Hello World" &> filename.txt
+```
+
 Use upper case for variables, reference https://stackoverflow.com/questions/673055/correct-bash-and-shell-script-variable-capitalization
 ```sh
 # Upper case variable name, preferred
