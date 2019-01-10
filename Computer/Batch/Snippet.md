@@ -2,18 +2,18 @@ Yes/No confirmation prompt
 ```bat
 rem GOTO syntax
 set RESPONSE=N
-set /P RESPONSE=Are you sure? (y/[N]): 
-if /I not [%RESPONSE%]==[Y] goto no
+set /p RESPONSE=Are you sure? (y/[N]): 
+if /i not "%RESPONSE%" == "Y" goto ANSWER_NO
 echo Yes!
-goto end
-:no
+goto END
+:ANSWER_NO
 echo No.
-:end
+:END
 
 rem Block syntax
 set RESPONSE=N
-set /P RESPONSE=Are you sure? (y/[N]): 
-if /I [%RESPONSE%]==[Y] (
+set /p RESPONSE=Are you sure? (y/[N]): 
+if /i "%RESPONSE%" == "Y" (
 	echo Yes!
 ) else (
 	echo No.
@@ -27,12 +27,12 @@ set WORKING_HOME=%~dp0
 set WORKING_HOME=%WORKING_HOME:~0,-1%
 
 rem Alternatively use trailing dot semantic, which is equivalent to path without trailing backslash
-set WORKING_HOME=%dp0.
+set WORKING_HOME=%~dp0.
 ```
 
 Set date time into variable, independent of the region and date format
 ```bat
-for /F "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set NOW=%%j
+for /f "usebackq tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^>NUL`) do if '.%%i.'=='.LocalDateTime.' set NOW=%%j
 set COMPACT=%NOW:~0,14%
 set READABLE=%NOW:~0,4%-%NOW:~4,2%-%NOW:~6,2% %NOW:~8,2%:%NOW:~10,2%:%NOW:~12,2%
 echo Local time in different formats are:
