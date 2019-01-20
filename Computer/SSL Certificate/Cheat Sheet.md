@@ -14,6 +14,11 @@ Check certificate information and purpose
 openssl x509 -text -purpose -nameopt multiline -certopt no_pubkey -certopt no_sigdump -noout -in server.crt
 ```
 
+Verify certificate using root certificate
+```sh
+openssl verify -CAfile ca.crt server.crt
+```
+
 Generate a private key using RSA 2048 bits
 ```sh
 openssl genrsa -out server.key 2048
@@ -34,9 +39,37 @@ Generate a new SHA256 signed CSR given a private key and an existing certificate
 openssl x509 -x509toreq -in server.crt -signkey server.key -sha256 -out server.csr
 ```
 
-Generate a self-signed SHA256 certificate with 10 years life given a private key and a CSR
+Generate a SHA256 certificate with 10 years life given a private key and a CSR
 ```sh
-openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt
+# Produce the same output as openssl self-sign certificate using openssl req
+cat << EOF > openssl_default_ext.conf
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always
+basicConstraints=critical,CA:TRUE
+EOF
+openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt -extfile openssl_default_ext.conf
+rm openssl_default_ext.conf
+
+# For CA certificate
+cat << EOF > ca_cert_ext.conf
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always
+keyUsage=critical,digitalSignature,keyCertSign,cRLSign
+extendedKeyUsage=serverAuth,clientAuth
+basicConstraints=critical,CA:TRUE,pathlen:0
+EOF
+openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt -extfile ca_cert_ext.conf
+rm ca_cert_ext.conf
+
+# [TBC] For client authentication certificate
+cat << EOF > client_cert_ext.conf
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always
+extendedKeyUsage=clientAuth
+basicConstraints=critical,CA:FALSE,pathlen:0
+EOF
+openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt -extfile client_cert_ext.conf
+rm client_cert_ext.conf
 ```
 
 Generate a private key using RSA 2048 bits and a self-signed SHA256 certificate with 10 years life
