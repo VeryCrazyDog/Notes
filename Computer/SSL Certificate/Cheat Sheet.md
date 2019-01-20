@@ -1,11 +1,17 @@
+## Notes
+Please notice that:
+- `.cert`, `.cer`, `.crt` are actually `.pem` (or rarely `.der`) formatted file with a different extension. Windows Explorer does not recognize `.pem` as a certificate file. See https://serverfault.com/questions/9708/what-is-a-pem-file-and-how-does-it-differ-from-other-openssl-generated-key-file.
+
+## Cheat sheet
+
 Check private key length
 ```sh
-openssl rsa -in server.key -text -noout
+openssl rsa -text -noout -in server.key
 ```
 
-Check certificate
+Check certificate information and purpose
 ```sh
-openssl x509 -in server.crt -text -noout
+openssl x509 -text -purpose -nameopt multiline -certopt no_pubkey -certopt no_sigdump -noout -in server.crt
 ```
 
 Generate a private key using RSA 2048 bits
@@ -38,10 +44,16 @@ Generate a private key using RSA 2048 bits and a self-signed SHA256 certificate 
 openssl req -newkey rsa:2048 -nodes -sha256 -keyout server.key -x509 -days 3650 -out server.crt -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
 ```
 
-Combine PEM private key and PEM certificate into a PKCS12 bundle
+Combine private key and certificate into a PKCS12 encrypted bundle
 ```sh
+# Combine private key and certificate
+openssl pkcs12 -export -out server.pfx -inkey server.key -in server.crt
+
+# Combine private key and certificate, and give a friendly name for display during import
 openssl pkcs12 -export -out server.pfx -inkey server.key -in server.crt -name "friendlyname"
-openssl pkcs12 -export -out server.pfx -inkey private.key -in cert.crt -certfile ca_cert.crt -name "friendlyname"
+
+# Combine private key and certificate, give a friendly name, and include additional certificates such as intermediate certificates or root certificate
+openssl pkcs12 -export -out server.pfx -inkey private.key -in cert.crt -certfile inter_certs.crt -name "friendlyname"
 ```
 
 List out all certificates in a Java keystore
