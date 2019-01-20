@@ -9,6 +9,11 @@ Check private key length
 openssl rsa -text -noout -in server.key
 ```
 
+Check a Certificate Signing Request (CSR)
+```sh
+openssl req -text -nameopt multiline -reqopt no_pubkey -reqopt no_sigdump -noout -verify -in server.csr
+```
+
 Check certificate information and purpose
 ```sh
 openssl x509 -text -purpose -nameopt multiline -certopt no_pubkey -certopt no_sigdump -noout -in server.crt
@@ -34,6 +39,32 @@ Generate a new SHA256 signed CSR given a private key
 openssl req -new -key server.key -sha256 -out server.csr -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
 ```
 
+Generate a new SHA256 signed CSR with subject alternative name using configuration file given a private key
+```sh
+cat <<EOF > server_cert.conf
+[req]
+default_bits=2048
+prompt=no
+default_md=sha256
+req_extensions=req_ext
+distinguished_name=dn
+[dn]
+C=HK
+ST=state
+L=city
+O=organization
+OU=department
+CN=commonname
+[req_ext]
+subjectAltName=@alt_names
+[alt_names]
+DNS.1=commonname
+DNS.2=commonname2
+EOF
+openssl req -new -key server.key -out server.csr -config server_cert.conf
+rm server_cert.conf
+```
+
 Generate a new SHA256 signed CSR given a private key and an existing certificate
 ```sh
 openssl x509 -x509toreq -in server.crt -signkey server.key -sha256 -out server.csr
@@ -41,7 +72,7 @@ openssl x509 -x509toreq -in server.crt -signkey server.key -sha256 -out server.c
 
 Generate a SHA256 certificate with 10 years life given a private key and a CSR
 ```sh
-# Produce the same output as openssl self-sign certificate using openssl req
+# Produce the same output as OpenSSL self-sign certificate using command `openssl req`
 cat << EOF > openssl_default_ext.conf
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always
@@ -51,7 +82,7 @@ openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out ser
 rm openssl_default_ext.conf
 
 # For CA certificate
-cat << EOF > ca_cert_ext.conf
+cat <<EOF > ca_cert_ext.conf
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always
 keyUsage=critical,digitalSignature,keyCertSign,cRLSign
@@ -61,12 +92,30 @@ EOF
 openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt -extfile ca_cert_ext.conf
 rm ca_cert_ext.conf
 
+# For server authentication certificate
+cat <<EOF > server_cert_ext.conf
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always
+keyUsage=critical,digitalSignature
+extendedKeyUsage=serverAuth
+basicConstraints=critical,CA:FALSE
+EOF
+# Include this if copy extensions is not enabled in OpenSSL, see https://stackoverflow.com/questions/21488845/how-can-i-generate-a-self-signed-certificate-with-subjectaltname-using-openssl
+cat <<EOF >> server_cert_ext.conf
+subjectAltName=@alt_names
+[alt_names]
+DNS.1=commonname
+DNS.2=commonname2
+EOF
+openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt -extfile server_cert_ext.conf
+rm server_cert_ext.conf
+
 # [TBC] For client authentication certificate
-cat << EOF > client_cert_ext.conf
+cat <<EOF > client_cert_ext.conf
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always
 extendedKeyUsage=clientAuth
-basicConstraints=critical,CA:FALSE,pathlen:0
+basicConstraints=critical,CA:FALSE
 EOF
 openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt -extfile client_cert_ext.conf
 rm client_cert_ext.conf
