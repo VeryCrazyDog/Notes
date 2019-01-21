@@ -2,6 +2,9 @@
 Please notice that:
 - `.cert`, `.cer`, `.crt` are actually `.pem` (or rarely `.der`) formatted file with a different extension. Windows Explorer does not recognize `.pem` as a certificate file. See https://serverfault.com/questions/9708/what-is-a-pem-file-and-how-does-it-differ-from-other-openssl-generated-key-file.
 
+## Reference
+- https://roll.urown.net/ca/ca_root_setup.html
+
 ## Cheat sheet
 
 Check private key length
@@ -11,12 +14,12 @@ openssl rsa -text -noout -in server.key
 
 Check a Certificate Signing Request (CSR)
 ```sh
-openssl req -text -nameopt multiline -reqopt no_pubkey -reqopt no_sigdump -noout -verify -in server.csr
+openssl req -text -nameopt multiline -reqopt no_pubkey,no_sigdump -noout -verify -in server.csr
 ```
 
 Check certificate information and purpose
 ```sh
-openssl x509 -text -purpose -nameopt multiline -certopt no_pubkey -certopt no_sigdump -noout -in server.crt
+openssl x509 -text -purpose -nameopt multiline -certopt no_pubkey,no_sigdump -noout -in server.crt
 ```
 
 Verify certificate using root certificate
@@ -29,17 +32,17 @@ Generate a private key using RSA 2048 bits
 openssl genrsa -out server.key 2048
 ```
 
-Generate a private key using RSA 2048 bits and a SHA256 signed CSR
+Generate a private key using RSA 2048 bits and a CSR
 ```sh
-openssl req -new -newkey rsa:2048 -nodes -sha256 -keyout server.key -out server.csr -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
+openssl req -new -newkey rsa:2048 -nodes -keyout server.key -out server.csr -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
 ```
 
-Generate a new SHA256 signed CSR given a private key
+Generate a CSR given a private key
 ```sh
-openssl req -new -key server.key -sha256 -out server.csr -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
+openssl req -new -key server.key -out server.csr -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
 ```
 
-Generate a new SHA256 signed CSR with subject alternative name using configuration file given a private key
+Generate a CSR with subject alternative name using configuration file given a private key
 ```sh
 cat <<EOF > server_cert.conf
 [req]
@@ -65,14 +68,17 @@ openssl req -new -key server.key -out server.csr -config server_cert.conf
 rm server_cert.conf
 ```
 
-Generate a new SHA256 signed CSR given a private key and an existing certificate
+Generate a CSR based on an existing certificate and a given private key
 ```sh
-openssl x509 -x509toreq -in server.crt -signkey server.key -sha256 -out server.csr
+openssl x509 -x509toreq -in server.crt -signkey server.key -out server.csr
 ```
 
-Generate a SHA256 certificate with 10 years life given a private key and a CSR
+Sign a CSR using a given private key and generate a SHA256 certificate with 10 years life
 ```sh
-# Produce the same output as OpenSSL self-sign certificate using command `openssl req`
+# Produce a V1 certificate
+openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt
+
+# Produce a V3 certificate which is same output as OpenSSL self-sign certificate using command `openssl req`
 cat << EOF > openssl_default_ext.conf
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always
@@ -81,7 +87,7 @@ EOF
 openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt -extfile openssl_default_ext.conf
 rm openssl_default_ext.conf
 
-# For CA certificate
+# Produce a V3 CA certificate which does not allow any intermediate CA
 cat <<EOF > ca_cert_ext.conf
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always
@@ -89,10 +95,11 @@ keyUsage=critical,digitalSignature,keyCertSign,cRLSign
 extendedKeyUsage=serverAuth,clientAuth
 basicConstraints=critical,CA:TRUE,pathlen:0
 EOF
-openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt -extfile ca_cert_ext.conf
+openssl x509 -req -sha256 -days 3650 -in ca.csr -signkey ca.key -out ca.crt -extfile ca_cert_ext.conf
 rm ca_cert_ext.conf
 
-# For server authentication certificate
+# Produce a V3 server authentication certificate
+# To enhance security, consider using `extendedKeyUsage=critical,serverAuth`
 cat <<EOF > server_cert_ext.conf
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always
@@ -110,7 +117,8 @@ EOF
 openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt -extfile server_cert_ext.conf
 rm server_cert_ext.conf
 
-# [TBC] For client authentication certificate
+# Produce a V3 client authentication certificate
+# To enhance security, consider using `extendedKeyUsage=critical,clientAuth`
 cat <<EOF > client_cert_ext.conf
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always
@@ -118,13 +126,32 @@ keyUsage=critical,digitalSignature
 extendedKeyUsage=clientAuth
 basicConstraints=critical,CA:FALSE
 EOF
-openssl x509 -req -sha256 -days 3650 -in server.csr -signkey server.key -out server.crt -extfile client_cert_ext.conf
+openssl x509 -req -sha256 -days 3650 -in client.csr -signkey client.key -out client.crt -extfile client_cert_ext.conf
 rm client_cert_ext.conf
 ```
 
-Generate a private key using RSA 2048 bits and a self-signed SHA256 certificate with 10 years life
+Generate a private key using RSA 2048 bits and a self-signed SHA256 V3 certificate with 10 years life
 ```sh
 openssl req -newkey rsa:2048 -nodes -sha256 -keyout server.key -x509 -days 3650 -out server.crt -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
+```
+
+Create a new CA serial
+```sh
+openssl rand -hex 16 > ca.srl
+```
+
+Sign a CSR using CA key, CA cert and CA serial, and generate a SHA256 V3 server certificate with 10 years life
+```sh
+# `authorityKeyIdentifier=keyid:always` should be removed if CA certificate does not contain `subjectKeyIdentifier`
+cat <<EOF > server_cert_ext.conf
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=serverAuth
+basicConstraints=critical,CA:FALSE
+EOF
+openssl x509 -req -sha256 -days 3650 -CA ca.crt -CAkey ca.key -CAserial ca.srl -in server.csr -out server.crt -extfile server_cert_ext.conf
+rm server_cert_ext.conf
 ```
 
 Combine private key and certificate into a PKCS12 encrypted bundle
