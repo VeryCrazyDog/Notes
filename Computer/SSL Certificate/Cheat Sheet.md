@@ -96,7 +96,7 @@ rm ca_cert_ext.conf
 cat <<EOF > server_cert_ext.conf
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always
-keyUsage=critical,digitalSignature
+keyUsage=critical,digitalSignature,keyEncipherment
 extendedKeyUsage=serverAuth
 basicConstraints=critical,CA:FALSE
 EOF
@@ -114,6 +114,7 @@ rm server_cert_ext.conf
 cat <<EOF > client_cert_ext.conf
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid:always
+keyUsage=critical,digitalSignature
 extendedKeyUsage=clientAuth
 basicConstraints=critical,CA:FALSE
 EOF
