@@ -34,12 +34,12 @@ openssl genrsa -out server.key 2048
 
 Generate a private key using RSA 2048 bits and a CSR
 ```sh
-openssl req -new -newkey rsa:2048 -nodes -keyout server.key -out server.csr -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
+openssl req -new -newkey rsa:2048 -nodes -keyout server.key -out server.csr -utf8 -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
 ```
 
 Generate a CSR given a private key
 ```sh
-openssl req -new -key server.key -out server.csr -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
+openssl req -new -key server.key -out server.csr -utf8 -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
 ```
 
 Generate a CSR with subject alternative name using configuration file given a private key
@@ -47,6 +47,7 @@ Generate a CSR with subject alternative name using configuration file given a pr
 cat <<EOF > server_cert.conf
 [req]
 default_bits=2048
+utf8=yes
 prompt=no
 default_md=sha256
 req_extensions=req_ext
@@ -132,7 +133,7 @@ rm client_cert_ext.conf
 
 Generate a private key using RSA 2048 bits and a self-signed SHA256 V3 certificate with 10 years life
 ```sh
-openssl req -newkey rsa:2048 -nodes -sha256 -keyout server.key -x509 -days 3650 -out server.crt -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
+openssl req -newkey rsa:2048 -nodes -sha256 -keyout server.key -x509 -days 3650 -out server.crt -utf8 -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
 ```
 
 Create a new CA serial
