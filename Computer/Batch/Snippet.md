@@ -40,29 +40,6 @@ echo [%READABLE%]
 echo [%COMPACT%]
 ```
 
-Template for launching program
-```bat
-@rem Do not use "echo off" to not affect any child calls
-
-@rem Set environment variables local to this batch file
-@setlocal
-
-@rem Reset to Windows 7 default environment variables
-@set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\
-@set CLASSPATH=
-
-@rem Configure additional environment variables
-@set PATH=%PATH%
-
-@rem Switch to the program start location
-@if not exist "%HOME%" @set HOME=%HOMEDRIVE%%HOMEPATH%
-@if not exist "%HOME%" @set HOME=%USERPROFILE%
-@cd /d %HOME%
-
-@rem Launch the program
-@start %COMSPEC%
-```
-
 Add hidden attribute to folders and files with filename started with dot
 ```bat
 for %%f in (.*.*) do attrib +h %%f
