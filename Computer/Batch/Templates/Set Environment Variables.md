@@ -28,6 +28,20 @@ For Windows 7
 @rem Include Android tools
 @set PATH=%PATH%;E:\Programs\Android\SDK\platform-tools
 
+@rem Set ORACLE_HOME, this is to override the value in registry HKEY_LOCAL_MACHINE\SOFTWARE\ORACLE\ORACLE_HOME to allow Oracle Instant Client to work properly
+@set "ORACLE_HOME= "
+@rem Set NLS_LANG, this is to override the value in registry HKEY_LOCAL_MACHINE\SOFTWARE\ORACLE\NLS_LANG to allow Oracle Instant Client to work properly
+@set "NLS_LANG= "
+@rem Include Oracle Instant Client
+@set PATH=%PATH%;C:\Programs\oracle\instantclient\instantclient-basiclite-windows.x64-12.1.0.2.0\instantclient_12_1
+
+@rem Include MySQL
+@set PATH=%PATH%;C:\Programs\mysql\mysql-5.6.34-winx64\bin
+@rem Include MySQL Utilities
+@set PATH=%PATH%;C:\Program Files\MySQL\MySQL Utilities 1.6
+@rem Include PostgreSQL
+@set PATH=%PATH%;C:\Programs\postgresql\postgresql-10.4-1-windows-x64-binaries\bin
+
 @rem Include VirtualBox
 @set PATH=%PATH%;C:\Program Files\Oracle\VirtualBox
 
