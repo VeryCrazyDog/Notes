@@ -14,16 +14,16 @@ set -o errexit
 set -e
 ```
 
-However, application writers should avoid relying on `set −e` within functions. For example, in the following script:
+However, application writers should avoid relying on `set -e` within functions. For example, in the following script:
 ```sh
 set -e
 start() {
-  some_server
-  echo 'some_server started successfully'
+	some_server
+	echo 'some_server started successfully'
 }
 start || echo >&2 'some_server failed'
 ```
-the `−e` setting is ignored within the function body (because the function is a command in an AND-OR list other than the last). Therefore, if `some_server` fails (such as command not found), the function carries on to echo "some_server started successfully", and the exit status of the function is zero (which means "some_server failed" is not output).
+the `-e` setting is ignored within the function body (because the function is a command in an AND-OR list other than the last). Therefore, if `some_server` fails (such as command not found), the function carries on to echo "some_server started successfully", and the exit status of the function is zero (which means "some_server failed" is not output).
 
 To run command without exit on failure while having `-e` setting enabled, use `||`. Reference https://stackoverflow.com/questions/28899561/termporarily-disable-set-e-set-o-errexit-in-bash
 ```sh
@@ -95,16 +95,16 @@ Prefer single square bracket for portability, reference https://stackoverflow.co
 foo='not   exist'
 # Single square bracket, portable but require quote
 if [ -e "$foo" ]; then
-  echo 'File exists'
+	echo 'File exists'
 else
-  echo 'File not exists'
+	echo 'File not exists'
 fi
 
 # Double square bracket, safer to use but not portable
 if [[ -e $foo ]]; then
-  echo 'File exists'
+	echo 'File exists'
 else
-  echo 'File not exists'
+	echo 'File not exists'
 fi
 ```
 
