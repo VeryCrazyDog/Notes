@@ -7,69 +7,108 @@ echo "Hello World" > filename.txt 2>&1
 echo "Hello World" &> filename.txt
 ```
 
-Use upper case for variables, reference https://stackoverflow.com/questions/673055/correct-bash-and-shell-script-variable-capitalization
+Enable exit on error, reference http://blog.jobbole.com/111514/
 ```sh
-# Upper case variable name, preferred
-STUDENT_NAME="foo"
-echo $STUDENT_NAME
+set -o errexit
+# Shortform, same as above
+set -e
+```
 
-# Lower case variable name, not preferred
+However, application writers should avoid relying on `set −e` within functions. For example, in the following script:
+```sh
+set -e
+start() {
+  some_server
+  echo 'some_server started successfully'
+}
+start || echo >&2 'some_server failed'
+```
+the `−e` setting is ignored within the function body (because the function is a command in an AND-OR list other than the last). Therefore, if `some_server` fails (such as command not found), the function carries on to echo "some_server started successfully", and the exit status of the function is zero (which means "some_server failed" is not output).
+
+To run command without exit on failure while having `-e` setting enabled, use `||`. Reference https://stackoverflow.com/questions/28899561/termporarily-disable-set-e-set-o-errexit-in-bash
+```sh
+# Noop
+not_exist_command || :
+# Alternatively execute true command
+not_exist_command || true
+```
+
+Enable exit on undefined variables, reference http://blog.jobbole.com/111514/
+```sh
+set -o nounset
+# Shortform, same as above
+set -u
+```
+
+Use lowercase with underscores for local variables, uppercase with underscores for environment variables and internal shell variables. Reference https://stackoverflow.com/questions/673055/correct-bash-and-shell-script-variable-capitalization
+```sh
+# Lowercase variable name, preferred
 student_name="foo"
 echo $student_name
+
+# Uppercase variable name, not preferred
+STUDENT_NAME="foo"
+echo $STUDENT_NAME
 ```
 
 Prefer quote when using variables
 ```sh
-FOO='yes   foo'
-# Output: $FOO
-echo '$FOO'
+foo='yes   foo'
+
+# Output: ${foo}
+echo '${foo}'
 # Output: yes foo
-echo $FOO
+echo ${foo}
 # Preferred, output: yes   foo
-echo "$FOO"
-# Output: $FOO   bar
-echo '$FOO   bar'
+echo "${foo}"
+# Output: ${foo}   bar
+echo '${foo}   bar'
 # Output: yes foo bar
-echo $FOO   bar
+echo ${foo}   bar
 # Preferred, output: yes   foo   bar
-echo "$FOO   bar"
+echo "${foo}   bar"
 ```
 
 Prefer curly braces around shell variables, reference https://stackoverflow.com/questions/8748831/when-do-we-need-curly-braces-around-shell-variables
 ```sh
 # Curly braces, preferred and required in this case
-echo "${FOO}bar"
+echo "${foo}bar"
 
 # Without curly braces, good for simple use
-echo "bar$FOO"
-echo "$FOO"
+echo "bar$foo"
+echo "$foo"
 ```
 
 Prefer dollar over backtick for command execution, reference https://askubuntu.com/questions/487554/using-backticks-or-dollar-in-shell-scripts
 ```sh
 # Dollar, preferred
-FOO=$(echo "foo's")
-echo $FOO
+foo="$(echo "foo's")"
+echo "$foo"
 
 # Backtick, not preferred and semi-deprecated
-FOO=`echo "foo's"`
-echo $FOO
+foo=`echo "foo's"`
+echo "$foo"
 ```
 
 Prefer single square bracket for portability, reference https://stackoverflow.com/questions/669452/is-double-square-brackets-preferable-over-single-square-brackets-in-ba
 ```sh
-FOO='not   exist'
+foo='not   exist'
 # Single square bracket, portable but require quote
-if [ -e "$FOO" ]; then
+if [ -e "$foo" ]; then
   echo 'File exists'
 else
   echo 'File not exists'
 fi
 
 # Double square bracket, safer to use but not portable
-if [[ -e $FOO ]]; then
+if [[ -e $foo ]]; then
   echo 'File exists'
 else
   echo 'File not exists'
 fi
+```
+
+Use `readonly` for constant or read only variables, reference http://blog.jobbole.com/111514/
+```sh
+readonly passwd_file="/etc/passwd"
 ```
