@@ -60,7 +60,7 @@ print_args() {
 }
 tags='"key1=value1" "key2=value   with   space" "key3=value3"'
 tag_array=()
-eval 'for word in '${tags}'; do tag_array+=("${word}"); done'
+eval "for word in ${tags}; do tag_array+=(\"\${word}\"); done"
 print_args "${tag_array[@]}"
 ```
 
