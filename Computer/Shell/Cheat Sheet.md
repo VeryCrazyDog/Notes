@@ -42,6 +42,7 @@ awk "BEGIN { print ("${number1}" < "${number2}") }"
 # Uncategorized
 Get source directory of the executing script, reference https://stackoverflow.com/questions/59895/getting-the-source-directory-of-a-bash-script-from-within
 ```sh
+# This doesn't work on Mac
 dir="$(dirname "$(readlink -f "${0}")")"
 echo "$dir"
 ```
@@ -49,6 +50,13 @@ echo "$dir"
 Create a file with timestamp as part of the filename
 ```sh
 touch "test_file_$(date +'%Y%m%d%H%M%S')"
+```
+
+Write to stderr. Notice that the position for redirection is not important, reference https://stackoverflow.com/questions/23489934/echo-2-some-text-what-does-it-mean-in-shell-scripting
+```sh
+>&2 echo 'Error message'
+echo >&2 'Error message'
+echo 'Error message' >&2
 ```
 
 Use `eval` to split quoted delimited string and use array to pass tokens into command
