@@ -43,7 +43,7 @@ awk "BEGIN { print ("${number1}" < "${number2}") }"
 Get source directory of the executing script, reference https://stackoverflow.com/questions/59895/getting-the-source-directory-of-a-bash-script-from-within
 ```sh
 # This doesn't work on Mac
-dir="$(dirname "$(readlink -f "${0}")")"
+dir=$(dirname "$(readlink -f "${0}")")
 echo "$dir"
 ```
 

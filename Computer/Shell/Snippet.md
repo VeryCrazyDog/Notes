@@ -54,9 +54,9 @@ do
 done
 
 # Determinate path
-path_backup_src="$(realpath "$path_backup_src")"
+path_backup_src=$(realpath "$path_backup_src")
 path_backup_dest="${path_backup_root_dir}${path_backup_src}"
-path_backup_dir="$(dirname "$path_backup_dest")"
+path_backup_dir=$(dirname "$path_backup_dest")
 
 # Determinate filename suffix
 filename_suffix='.bak'

@@ -82,7 +82,7 @@ echo "$foo"
 Prefer dollar over backtick for command execution, reference https://askubuntu.com/questions/487554/using-backticks-or-dollar-in-shell-scripts
 ```sh
 # Dollar, preferred
-foo="$(echo "foo's")"
+foo=$(echo "foo's")
 echo "$foo"
 
 # Backtick, not preferred and semi-deprecated
