@@ -42,7 +42,7 @@ Generate a CSR given a private key
 openssl req -new -key server.key -out server.csr -utf8 -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
 ```
 
-Generate a CSR with subject alternative name using configuration file given a private key
+Generate a CSR requesting specific subject alternative names using configuration file given a private key
 ```sh
 cat <<EOF > server_cert.conf
 [req]
@@ -60,6 +60,36 @@ O=organization
 OU=department
 CN=commonname
 [req_ext]
+subjectAltName=@alt_names
+[alt_names]
+DNS.1=commonname
+DNS.2=commonname2
+EOF
+openssl req -new -key server.key -out server.csr -config server_cert.conf
+rm server_cert.conf
+```
+
+Generate a CSR requesting extensions for server authentication and specific subject alternative names using configuration file given a private key
+```sh
+cat <<EOF > server_cert.conf
+[req]
+default_bits=2048
+utf8=yes
+prompt=no
+default_md=sha256
+req_extensions=req_ext
+distinguished_name=dn
+[dn]
+C=HK
+ST=state
+L=city
+O=organization
+OU=department
+CN=commonname
+[req_ext]
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=serverAuth
+basicConstraints=critical,CA:FALSE
 subjectAltName=@alt_names
 [alt_names]
 DNS.1=commonname
