@@ -16,11 +16,13 @@ readonly ca_has_key_id=0
 common_name=
 alt_names=()
 
-# Parse arguments
+# Check arguments
 if [ $# -eq 0 ]; then
 	echo "Usage: ${0} common_name [subject_alt_name1] [subject_alt_name2] [...]"
 	exit 0
 fi
+
+# Parse arguments
 common_name="$1"
 shift
 if [ $# -ne 0 ]; then

@@ -6,15 +6,17 @@ set -e
 set -u
 
 # Configuration
-dest_root_dir_path=$(realpath ~/"Backup/$(hostname)")
+readonly dest_root_dir_path=$(realpath ~/"Backup/$(hostname)")
 
 # Constants
 readonly backup_suffix='.bak'
 readonly original_suffix='.ori'
 
+# Define variables
+src_path=
+
 # Set default options
 use_ori_suffix=0
-src_path=
 
 # Parse arguments
 while [ $# -gt 0 ]; do
