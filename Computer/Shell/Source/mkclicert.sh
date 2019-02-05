@@ -5,17 +5,29 @@ set -e
 # Enable exit on undefined variables
 set -u
 
-# New certificate configuration
-readonly common_name='VCD'
-readonly alt_names=('vcd' 'captain')
+# Configuration
 readonly server_auth=1
-
-# CA configuration
 readonly ca_key_path='/etc/nginx/ca.key'
 readonly ca_serial_path='/etc/nginx/ca.srl'
 readonly ca_cert_path='/etc/nginx/ca.crt'
 readonly ca_has_key_id=0
 
+# Define variables
+common_name=
+alt_names=()
+
+# Parse arguments
+if [ $# -eq 0 ]; then
+	echo "Usage: ${0} common_name [subject_alt_name1] [subject_alt_name2] [...]"
+	exit 0
+fi
+common_name="$1"
+shift
+if [ $# -ne 0 ]; then
+	alt_names=("$@")
+fi
+
+# Implementation
 echo 'Creating private key...'
 openssl genrsa -out client.key 2048
 
@@ -42,11 +54,13 @@ if [ $server_auth -eq 1 ]; then
 	echo 'subjectAltName=@alt_names' >> client_cert_ext.conf
 	echo '[alt_names]' >> client_cert_ext.conf
 	echo "DNS.1=${common_name}" >> client_cert_ext.conf
-	i=2
-	for alt_name in "${alt_names[@]}"; do
-		echo "DNS.${i}=${alt_name}" >> client_cert_ext.conf
-		i=$((i+1))
-	done
+	if [ ${#alt_names[@]} -ne 0 ]; then
+		i=2
+		for alt_name in "${alt_names[@]}"; do
+			echo "DNS.${i}=${alt_name}" >> client_cert_ext.conf
+			i=$((i+1))
+		done
+	fi
 fi
 sudo openssl x509 \
 	-req -sha256 \
