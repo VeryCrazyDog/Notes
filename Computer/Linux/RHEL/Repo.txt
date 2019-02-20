@@ -1,0 +1,5 @@
+# https://fedoraproject.org/wiki/EPEL
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+
+# https://ius.io/
+yum install https://centos6.iuscommunity.org/ius-release.rpm
