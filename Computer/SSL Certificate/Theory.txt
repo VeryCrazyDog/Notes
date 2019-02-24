@@ -1,3 +1,5 @@
 For client to validate server, server encrypt a message with private key, client decrypt it with public key to validate.
 
 For data transfer, use public and private key to exchange the encryption key, then use symmetric encryption for data transfer.
+
+For more information, see https://gist.github.com/Soarez/9688998.
