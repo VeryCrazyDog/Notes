@@ -280,11 +280,10 @@ WHERE username = USER AND wait_class <> 'Idle' AND time_remaining_micro = -1
 ORDER BY logon_time;
 ```
 
-Find sessions which are running DBMS jobs for at least 1 day under the current logged in user
+Find sessions which are running DBMS jobs for at least 1 day under the current logged in user, only limit to current connected node if RAC is used
 
 ```sql
 SELECT
-	s.inst_id,
 	r.sid,
 	s."SERIAL#",
 	s.osuser,
@@ -303,7 +302,7 @@ SELECT
 	'ALTER SYSTEM KILL SESSION ''' || TO_CHAR(r.sid) || ',' || TO_CHAR(s."SERIAL#") || ''' IMMEDIATE;' AS ks_sql
 FROM dba_jobs_running r
 	INNER JOIN dba_jobs j ON r.job = j.job
-	INNER JOIN gv$session s ON r.sid = s.sid
+	INNER JOIN v$session s ON r.sid = s.sid
 WHERE j.schema_user = USER AND s.last_call_et >= 60 * 60 * 24
 ORDER BY s.last_call_et DESC;
 ```
