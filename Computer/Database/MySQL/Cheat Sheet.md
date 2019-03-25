@@ -24,9 +24,9 @@ ORDER BY total_indexes DESC;
 
 # Import and Export
 
-Export all table structures with data in a schema using SQL format, with no `CREATE DATABASE` statement
+Export all tables, stored procedures, functions and data in a schema using SQL format, with no `CREATE DATABASE` statement
 ```sh
-mysqldump -u user_name -p --lock-tables database_name > database_name.$(date +'%Y%m%d%H%M%S').sql
+mysqldump -u user_name -p --routines --lock-tables database_name > database_name.$(date +'%Y%m%d%H%M%S').sql
 ```
 
 Export multiple table structures with data in a schema using SQL format
