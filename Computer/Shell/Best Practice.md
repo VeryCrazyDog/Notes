@@ -40,6 +40,12 @@ set -o nounset
 set -u
 ```
 
+Enable exit on error and on undefined variables, and output the error line using trap
+```sh
+set -eu
+trap 'echo "[ERROR] Internal error. ${BASH_SOURCE}:${LINENO} ${BASH_COMMAND}" >&2' ERR
+```
+
 Use lowercase with underscores for local variables, uppercase with underscores for environment variables and internal shell variables. Reference https://stackoverflow.com/questions/673055/correct-bash-and-shell-script-variable-capitalization
 ```sh
 # Lowercase variable name, preferred
