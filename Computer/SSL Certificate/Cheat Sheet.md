@@ -4,6 +4,7 @@ Please notice that:
 
 ## Reference
 - https://roll.urown.net/ca/ca_root_setup.html
+- https://github.com/diffiehellman64/graphicSSL/blob/master/openssl.cnf
 
 ## Cheat sheet
 
