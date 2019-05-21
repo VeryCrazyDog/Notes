@@ -84,6 +84,22 @@ rem Cleanup
 echo [DEBUG] Cleaning up
 rmdir /s /q "%VSCODE_TMP_PATH%"
 rmdir /s /q "%TMP_PATH%"
+if exist "%VSCODE_TMP_PATH%" (
+	echo Trying to remove "%VSCODE_TMP_PATH%" again...
+	ping 127.0.0.1 -n 2 > nul
+	rmdir /s /q "%VSCODE_TMP_PATH%"
+)
+if exist "%VSCODE_TMP_PATH%" (
+	echo Trying to remove "%VSCODE_TMP_PATH%" again...
+	ping 127.0.0.1 -n 2 > nul
+	rmdir /s /q "%VSCODE_TMP_PATH%"
+)
+if exist "%VSCODE_TMP_PATH%" (
+	echo Trying to remove "%VSCODE_TMP_PATH%" again...
+	ping 127.0.0.1 -n 2 > nul
+	rmdir /s /q "%VSCODE_TMP_PATH%"
+)
+if exist "%VSCODE_TMP_PATH%" echo Failed to remove directory "%VSCODE_TMP_PATH%"
 
 rem Complete
 echo [INFO] %~0 ended
