@@ -491,6 +491,11 @@ FROM user_jobs;
 
 # User and Privilege Management
 
+Change password
+```sql
+ALTER USER USER IDENTIFIED BY "<new_password>";
+```
+
 Query privileges
 ```sql
 -- Query a particular user/role using DBA dictionary views
