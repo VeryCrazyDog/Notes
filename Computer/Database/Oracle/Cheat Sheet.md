@@ -493,7 +493,7 @@ FROM user_jobs;
 
 Change password
 ```sql
-ALTER USER USER IDENTIFIED BY "<new_password>";
+ALTER USER <username> IDENTIFIED BY "<new_password>";
 ```
 
 Query privileges
