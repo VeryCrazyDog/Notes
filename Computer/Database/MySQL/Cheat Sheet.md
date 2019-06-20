@@ -22,6 +22,23 @@ GROUP BY table_name
 ORDER BY total_indexes DESC;
 ```
 
+## Data Size Information
+
+Find size of each table and associated indexes
+
+```sql
+SELECT
+	table_name,
+	table_rows,
+	avg_row_length,
+	ROUND((data_length / 1024 / 1024 / 1024), 2) table_gigabytes,
+	ROUND((index_length / 1024 / 1024 / 1024), 2) index_gigabytes,
+	ROUND(((data_length + index_length) / 1024 / 1024 / 1024), 2) total_gigabytes
+FROM information_schema.tables
+WHERE table_schema = DATABASE()
+ORDER BY total_gigabytes DESC;
+```
+
 # Import and Export
 
 Export all tables, stored procedures, functions and data in a schema using SQL format, with no `CREATE DATABASE` statement
