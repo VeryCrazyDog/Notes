@@ -25,3 +25,16 @@ This is the revision note for AWS solution architect associate exam.
 	* HealthCheck
 	* ReplaceUnhealthy
 	* ScheduledActions
+
+## S3
+1. Cross-region replication requires versioning on both source bucket and destination bucket. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/crr.html).
+2. Cross-region replication requires the source bucket owner have the source and destination AWS Regions enabled. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/crr.html).
+
+## ElastiCache ([FAQ](https://aws.amazon.com/elasticache/faqs/))
+1. Memcached did not support encryption. Redis support encryption for version 3.2.6, 4.0.10 and later.
+2. Memcached did not support replication, therefore when a node was failed, some data was lost.
+3. Memcached run in cluster, and can scale out and in by adding node and removing node.
+4. There are 2 types of Redis clusters (a.k.a replication groups in API/CLI). They are Redis (cluster mode disabled) cluster and Redis (cluster mode enabled) cluster.
+5. Data partitioning is supported in memcached and Redis (cluster mode enabled) cluster.
+6. One Redis node with 0 to 5 Redis replica node form a shard (a.k.a node group in API/CLI). Redis (cluster mode disabled) cluster only contain 1 shard. Redis (cluster mode enabled) cluster can contain 1 to 90 shard.
+7. Redis replica node provide high availibity and read throughput. If the write node failed, it is possible to failover to the replica node.
