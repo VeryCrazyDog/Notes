@@ -13,6 +13,9 @@ This is the revision note for AWS solution architect associate exam.
 	* Manual scaling
 	* Scale based on a schedule
 	* Scale based on demand (dynamic scaling)
+		* Target tracking scaling
+		* Step scaling
+		* Simple scaling
 5. It is possible to set the instance health status to `Healthy` or `Unhealthy`.
 6. After an instance has been marked unhealthy by Auto Scaling, as a result of an Amazon EC2 or ELB health check, it is almost immediately scheduled for replacement as it will never automatically recover its health.
 7. CloudWatch detailed monitoring is by default enabled in autoscaling launch configuration (not to be confused with EC2 launch template).
@@ -25,6 +28,10 @@ This is the revision note for AWS solution architect associate exam.
 	* HealthCheck
 	* ReplaceUnhealthy
 	* ScheduledActions
+9. Both step scaling and simple scaling need to configure scaling adjustment types, 3 available types as of 2019-06-23 are:
+	* ChangeInCapacity
+	* ExactCapcity
+	* PercentChangeInCapacity
 
 ## S3
 1. Cross-region replication requires versioning on both source bucket and destination bucket. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/crr.html).
@@ -38,3 +45,23 @@ This is the revision note for AWS solution architect associate exam.
 5. Data partitioning is supported in memcached and Redis (cluster mode enabled) cluster.
 6. One Redis node with 0 to 5 Redis replica node form a shard (a.k.a node group in API/CLI). Redis (cluster mode disabled) cluster only contain 1 shard. Redis (cluster mode enabled) cluster can contain 1 to 90 shard.
 7. Redis replica node provide high availibity and read throughput. If the write node failed, it is possible to failover to the replica node.
+
+## Route 53
+1. The follow routing rules are supported in traffic policy:
+	* Failover rule
+	* Geolocation rule
+	* Latency rule
+	* Geoproximity rule
+	* Multivalue answer rule
+	* Weighted rule
+
+## Storage Gateway ([FAQ](https://aws.amazon.com/storagegateway/faqs/))
+1. There are 3 types of gateways:
+	* File gateway
+	* Volume gateway
+	* Tape gateway
+2. File gateway only work in cached mode, while volume gateway support both cached volumes and stored volumes
+
+
+## EBS
+1. EBS is relatively less scalable. Scaling is possible on capacity, IPOS, and by switching to different volume type. These changes can be done while the volume is attached and in used, but will take times to complete.
