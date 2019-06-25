@@ -65,3 +65,25 @@ This is the revision note for AWS solution architect associate exam.
 
 ## EBS
 1. EBS is relatively less scalable. Scaling is possible on capacity, IPOS, and by switching to different volume type. These changes can be done while the volume is attached and in used, but will take times to complete.
+
+## ELB
+1. Classic load balancer supports the following protocols:
+	* Layer 4
+		* TCP
+		* SSL
+	* Layer 7
+		* HTTP
+		* HTTPS
+2. Classic load balancer supports the following configuration:
+	* Layer 4
+		* TCP front-end, TCP back-end
+		* SSL front-end, TCP back-end
+		* SSL front-end, SSL back-end
+	* Layer 7
+		* HTTP front-end, HTTP back-end
+		* HTTPS front-end, HTTP back-end
+		* HTTPS front-end, HTTPS back-end
+3. For classic load balancer:
+	* For layer 4 protocol, only TCP back-end supports proxy protocol header and by default it is not enabled. SSL back-end do not supports proxy protocol header.
+	* For layer 7 protcool, both HTTP and HTTPS back-end supports X-Forwarded headers. By default it is enabled?
+4. Classic load balancer support sticky sessions for layer 7 protocol. Cookie is needed and it will be created by the classic load balancer.
