@@ -19,6 +19,8 @@ This is the revision note for AWS solution architect associate exam.
 1. Termination Protection only prevent termination by API (AWS console and CLI also use API), and does not prevent you from terminating an instance by initiating shutdown from the instance with shutdown behavior set to `Terminate`.
 2. Once an instance is launched, the user cannot change the availability zone of that instance unless he creates an AMI of that instance and launches a new instance from it.
 3. AMI ID is different for different region even the image is the same.
+4. *InstanceLimitExceeded* error occur when you have reached the limit on the number of instances that you can launch in a region.
+5. *InsufficientInstanceCapacity* error occur when AWS does not currently have enough available On-Demand capacity to service your request.
 ### Scheduled instance ([Reference](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-scheduled-instances.html))
 1. Scheduled instance cannot be stopped or rebooted, only manual termination is allowd. After terminated for a few minutes, it can be relaunch again.
 2. Scheduled instance is terminated three minutes before the end of the current scheduled time period.
@@ -73,6 +75,7 @@ This is the revision note for AWS solution architect associate exam.
 1. EBS is relatively less scalable. Scaling is possible on capacity, IPOS, and by switching to different volume type. These changes can be done while the volume is attached and in used, but will take times to complete.
 2. SSD vs HDD is not about cost or speed. It is about random access vs sequel access.
 3. Data stored on EBS is automatically replicated within an availability zone, but does not replicate cross availability zone.
+4. An EBS-optimized instance provides additional, dedicated throughput for Amazon EBS I/O. This provides improved performance for your Amazon EBS volumes and enables instances to use provisioned IOPs fully. For example, using a t2.micro instance with high IOPS EBS volume will not deliver IOPS as the network link is shared between EBS I/O and network I/O.
 
 ## Storage: RDS
 1. In RDS, multi-AZ and read replica are different. Standby instance in multi-AZ is not read accessible.
@@ -122,3 +125,7 @@ This is the revision note for AWS solution architect associate exam.
 	* For layer 4 protocol, only TCP back-end supports proxy protocol header and by default it is not enabled. SSL back-end do not supports proxy protocol header.
 	* For layer 7 protcool, both HTTP and HTTPS back-end supports X-Forwarded headers. By default it is enabled?
 4. Classic load balancer support sticky sessions for layer 7 protocol. Cookie is needed and it will be created by the classic load balancer.
+5. With cross-zone load balancing, each load balancer node for your Classic Load Balancer distributes requests evenly across the registered instances in all enabled Availability Zones. If cross-zone load balancing is disabled, each load balancer node distributes requests evenly across the registered instances in its Availability Zone only.  [Reference](https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/enable-disable-crosszone-lb.html).
+6. Classic load balancer attaches to subnet level.
+7. Classic load balancer is actually a fleet of EC2 instances.
+8. Classic load balancer requires at least 1 subnet to be selected to route traffic to, but recommend to select 2 subnets in 2 different AZ to provide high availability on the classic load balancer.
