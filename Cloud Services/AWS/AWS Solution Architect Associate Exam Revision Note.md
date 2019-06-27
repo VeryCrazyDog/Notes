@@ -1,14 +1,24 @@
 # AWS Solution Architect Associate Exam Revision Note
 This is the revision note for AWS solution architect associate exam.
 
-## General Advice
-* Don't consider corner case.
-* Choose the most reasonable answer.
-* Choose an answer which has least dependency. For example, if we want to get the total count of HTTP 404, we can use CloudWatch metric, but we need the log first, so enable logging is the answer.
+## General
+### Exam Advice
+1. Don't consider corner case.
+2. Choose the most reasonable answer.
+3. Choose an answer which has least dependency. For example, if we want to get the total count of HTTP 404, we can use CloudWatch metric, but we need the log first, so enable logging is the answer.
+### Concept
+1. High availability and fault tolerant are 2 different concepts. High availability in AWS definition is that it will automatically recover without manual intervention. Down time or degraded service is allowed. Fault tolerant means user should not notice fault is happens, and no downtime and degrade is allowed.
+2. RTO means recovery time objective, RPO means recovery point objective.
+### Practice
+1. Using AWS managed services should always be preferred.
+2. Expect that everything will fail at some point and design accordingly.
+3. In practice, we should set the minimum capacity of an auto scaling group to 0, 1, 2, even there is no restriction in AWS.
+4. Prefer IAM roles to access keys.
 
 ## Compute: EC2
 1. Termination Protection only prevent termination by API (AWS console and CLI also use API), and does not prevent you from terminating an instance by initiating shutdown from the instance with shutdown behavior set to `Terminate`.
 2. Once an instance is launched, the user cannot change the availability zone of that instance unless he creates an AMI of that instance and launches a new instance from it.
+3. AMI ID is different for different region even the image is the same.
 ### Scheduled instance ([Reference](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-scheduled-instances.html))
 1. Scheduled instance cannot be stopped or rebooted, only manual termination is allowd. After terminated for a few minutes, it can be relaunch again.
 2. Scheduled instance is terminated three minutes before the end of the current scheduled time period.
@@ -50,6 +60,7 @@ This is the revision note for AWS solution architect associate exam.
 2. Cross-region replication requires the source bucket owner have the source and destination AWS Regions enabled. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/crr.html).
 3. To use server-side encryption with customer-provided encryption keys (SSE-C), encryption key and other related information need to be provided in each API call via HTTP headers. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html).
 4. A presigned URL gives you access to the object identified in the URL, provided that the creator of the presigned URL has permissions to access that object. The presigned URLs are useful if you want your user/customer to be able to upload a specific object to your bucket, but you don't require them to have AWS security credentials or permissions. When you create a presigned URL, you must provide your security credentials and then specify a bucket name, an object key, an HTTP method (PUT for uploading objects), and an expiration date and time. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/PresignedUrlUploadObject.html).
+5. S3 use write once read many (WORM) model. It means the objects are immutable. That is, the only way to change a single byte in an object is to replace the object.
 
 ## Storage: Storage Gateway ([FAQ](https://aws.amazon.com/storagegateway/faqs/))
 1. There are 3 types of gateways:
@@ -60,6 +71,11 @@ This is the revision note for AWS solution architect associate exam.
 
 ## Storage: EBS
 1. EBS is relatively less scalable. Scaling is possible on capacity, IPOS, and by switching to different volume type. These changes can be done while the volume is attached and in used, but will take times to complete.
+2. SSD vs HDD is not about cost or speed. It is about random access vs sequel access.
+3. Data stored on EBS is automatically replicated within an availability zone, but does not replicate cross availability zone.
+
+## Storage: RDS
+1. In RDS, multi-AZ and read replica are different. Standby instance in multi-AZ is not read accessible.
 
 ## Storage: ElastiCache ([FAQ](https://aws.amazon.com/elasticache/faqs/))
 1. Data partitioning is supported in memcached and Redis (cluster mode enabled) cluster.
@@ -71,6 +87,9 @@ This is the revision note for AWS solution architect associate exam.
 1. There are 2 types of Redis clusters (a.k.a replication groups in API/CLI). They are Redis (cluster mode disabled) cluster and Redis (cluster mode enabled) cluster.
 2. One Redis node with 0 to 5 Redis replica node form a shard (a.k.a node group in API/CLI). Redis (cluster mode disabled) cluster only contain 1 shard. Redis (cluster mode enabled) cluster can contain 1 to 90 shard.
 3. Redis replica node provide high availibity and read throughput. If the write node failed, it is possible to failover to the replica node.
+
+## Network: Security Group
+1. Security groups actually applies to ENI (elastic network interface), not EC2 instance or Lambda or RDS.
 
 ## Network: Route 53
 1. The follow routing rules are supported in traffic policy:
