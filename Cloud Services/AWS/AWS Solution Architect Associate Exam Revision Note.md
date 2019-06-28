@@ -14,6 +14,10 @@ This is the revision note for AWS solution architect associate exam.
 2. Expect that everything will fail at some point and design accordingly.
 3. In practice, we should set the minimum capacity of an auto scaling group to 0, 1, 2, even there is no restriction in AWS.
 4. Prefer IAM roles to access keys.
+### Policy
+1. No prior AWS approval is required for penetration test on some AWS services such as EC2, RDS, CloudFront, API Gateway, etc. ([Reference](https://aws.amazon.com/security/penetration-testing/))
+### AWS
+1. AWS assigns two unique IDs to each AWS account: an AWS account ID and a canonical user ID. The AWS account ID is a 12-digit number, such as 123456789012. The canonical user ID is a long string, such as 79a59df900b949e55d96a1e698fbacedfd6e09d98eacf8f8d5218e7cd47ef2be.
 
 ## Compute: EC2
 1. Termination Protection only prevent termination by API (AWS console and CLI also use API), and does not prevent you from terminating an instance by initiating shutdown from the instance with shutdown behavior set to `Terminate`.
@@ -61,8 +65,13 @@ This is the revision note for AWS solution architect associate exam.
 1. Cross-region replication requires versioning on both source bucket and destination bucket. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/crr.html).
 2. Cross-region replication requires the source bucket owner have the source and destination AWS Regions enabled. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/crr.html).
 3. To use server-side encryption with customer-provided encryption keys (SSE-C), encryption key and other related information need to be provided in each API call via HTTP headers. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html).
-4. A presigned URL gives you access to the object identified in the URL, provided that the creator of the presigned URL has permissions to access that object. The presigned URLs are useful if you want your user/customer to be able to upload a specific object to your bucket, but you don't require them to have AWS security credentials or permissions. When you create a presigned URL, you must provide your security credentials and then specify a bucket name, an object key, an HTTP method (PUT for uploading objects), and an expiration date and time. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/PresignedUrlUploadObject.html).
+4. A presigned URL gives you access to the object identified in the URL, provided that the creator of the presigned URL has permissions to access that object. The presigned URLs are useful if you want your user/customer to be able to upload a specific object to your bucket, but you don't require them to have AWS security credentials or permissions. When you create a presigned URL, you must provide your security credentials and then specify a bucket name, an object key, an HTTP method (PUT for uploading objects), and an expiration date and time.
 5. S3 use write once read many (WORM) model. It means the objects are immutable. That is, the only way to change a single byte in an object is to replace the object.
+6. To make objects publicly readable, this can be done by either modifying the ACL on the objects one by one to allow public read, or by using bucket policy managed by the bucket owner.
+7. By default, only the object owner can read the object and change the object ACL. The bucket owner is not able to read or change the ACL unless access has been granted to the bucket owner. Bucket owner can enforce all objects put into the bucket granted access right to the bucket owner via bucket policy.
+8. Only list and write access are avaiable to grant in bucket ACL. To grant read access to object in a bucket, object ACL should be used.
+9. Objects uploaded to a bucket by another account don't automatically inherit the permissions defined in the bucket policy. The bucket owner must take ownership of the object for the bucket policy to apply. [Reference](https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-acl-email-error/).
+10. To allow another account to upload objects to your bucket, it's a best practice to create an AWS Identity and Access Management (IAM) role from your account that the other account can assume. [Reference](https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-acl-email-error/).
 
 ## Storage: Storage Gateway ([FAQ](https://aws.amazon.com/storagegateway/faqs/))
 1. There are 3 types of gateways:
@@ -91,8 +100,9 @@ This is the revision note for AWS solution architect associate exam.
 2. One Redis node with 0 to 5 Redis replica node form a shard (a.k.a node group in API/CLI). Redis (cluster mode disabled) cluster only contain 1 shard. Redis (cluster mode enabled) cluster can contain 1 to 90 shard.
 3. Redis replica node provide high availibity and read throughput. If the write node failed, it is possible to failover to the replica node.
 
-## Network: Security Group
+## Network: VPC
 1. Security groups actually applies to ENI (elastic network interface), not EC2 instance or Lambda or RDS.
+2. Besides public subnet and private subnet, if a subnet has default route to a virtual private gateway for a Site-to-Site VPN connection, the subnet is known as a VPN-only subnet.
 
 ## Network: Route 53
 1. The follow routing rules are supported in traffic policy:
@@ -129,3 +139,4 @@ This is the revision note for AWS solution architect associate exam.
 6. Classic load balancer attaches to subnet level.
 7. Classic load balancer is actually a fleet of EC2 instances.
 8. Classic load balancer requires at least 1 subnet to be selected to route traffic to, but recommend to select 2 subnets in 2 different AZ to provide high availability on the classic load balancer.
+
