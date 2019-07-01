@@ -52,7 +52,7 @@ This is the revision note for AWS solution architect associate exam.
 7. Convertible reserved instance can be exchanged during the term for another convertible reserved instance with new attributes including instance family, instance type, platform, scope, or tenancy. You can also modify some attributes of a convertible reserved instance the same way as standard reserved instance.
 8. Instance size flexibility is determined by the normalization factor of the instance size. The discount applies either fully or partially to running instances of the same instance family, depending on the instance size of the reservation, in any Availability Zone in the Region. The only attributes that must be matched are the instance family, tenancy, and platform. [Reference](https://docs.aws.amazon.com/en_us/AWSEC2/latest/UserGuide/apply_ri.html).
 
-## Compute: EC2 Auto Scaling ([FAQ](https://aws.amazon.com/ec2/autoscaling/faqs/))
+## Compute: EC2 Auto Scaling
 1. A running EC2 instance can be added to a new auto scaling group.
 2. [From CloudAcademy, not verified] A running EC2 instance can also be added to an existing auto scaling group, but only limited to auto scaling group using EC2 launch template and not auto scaling group using auto scaling launch configuration.
 3. EC2 instance can also be detached from existing auto scaling group.
@@ -93,7 +93,7 @@ This is the revision note for AWS solution architect associate exam.
 9. Objects uploaded to a bucket by another account don't automatically inherit the permissions defined in the bucket policy. The bucket owner must take ownership of the object for the bucket policy to apply. [Reference](https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-acl-email-error/).
 10. To allow another account to upload objects to your bucket, it's a best practice to create an AWS Identity and Access Management (IAM) role from your account that the other account can assume. [Reference](https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-acl-email-error/).
 
-## Storage: Storage Gateway ([FAQ](https://aws.amazon.com/storagegateway/faqs/))
+## Storage: Storage Gateway
 1. There are 3 types of gateways:
 	* File gateway
 	* Volume gateway
@@ -110,7 +110,7 @@ This is the revision note for AWS solution architect associate exam.
 1. In RDS, multi-AZ and read replica are different. Standby instance in multi-AZ is not read accessible.
 2. RDS reserved instance is similiar to EC2 standard regional reserved instance with instance size flexibility.
 
-## Storage: ElastiCache ([FAQ](https://aws.amazon.com/elasticache/faqs/))
+## Storage: ElastiCache
 1. Data partitioning is supported in memcached and Redis (cluster mode enabled) cluster.
 ### Memcached
 1. Memcached did not support encryption. Redis support encryption for version 3.2.6, 4.0.10 and later.
@@ -125,11 +125,11 @@ This is the revision note for AWS solution architect associate exam.
 1. CloudFront signed URLs and signed cookies allow you to control who can access your content so that you can serve private content through CloudFront. [Reference](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-choosing-signed-urls-cookies.html).
 2. Origin access identity should be used to allow only CloudFront to access the private content on S3 and not allow users to direct access S3. [Reference](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html).
 
-## Network: VPC
+## Network: VPC ([FAQ](https://aws.amazon.com/vpc/faqs/))
 1. Security groups actually applies to ENI (elastic network interface), not EC2 instance or Lambda or RDS.
 2. Besides public subnet and private subnet, if a subnet has default route to a virtual private gateway for a Site-to-Site VPN connection, the subnet is known as a VPN-only subnet.
 
-## Network: Route 53
+## Network: Route 53 ([FAQ](https://aws.amazon.com/route53/faqs/))
 1. The follow routing rules are supported in traffic policy:
 	* Failover rule
 	* Geolocation rule
@@ -138,7 +138,7 @@ This is the revision note for AWS solution architect associate exam.
 	* Multivalue answer rule
 	* Weighted rule
 
-## Network: ELB ([FAQ](https://aws.amazon.com/elasticloadbalancing/faqs/))
+## Network: ELB
 ### Classic load balancer
 1. Classic load balancer supports the following protocols:
 	* Layer 4
@@ -164,3 +164,5 @@ This is the revision note for AWS solution architect associate exam.
 6. Classic load balancer attaches to subnet level.
 7. Classic load balancer is actually a fleet of EC2 instances.
 8. Classic load balancer requires at least 1 subnet to be selected to route traffic to, but recommend to select 2 subnets in 2 different AZ to provide high availability on the classic load balancer.
+
+## Messaging: SQS ([FAQ](https://aws.amazon.com/sqs/faqs/))
