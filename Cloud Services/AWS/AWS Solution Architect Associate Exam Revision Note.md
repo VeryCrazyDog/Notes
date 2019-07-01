@@ -23,7 +23,7 @@ This is the revision note for AWS solution architect associate exam.
 	* DynamoDB
 	* Redshift
 
-## Compute: EC2
+## Compute: EC2 ([FAQ](https://aws.amazon.com/ec2/faqs/))
 1. Termination Protection only prevent termination by API (AWS console and CLI also use API), and does not prevent you from terminating an instance by initiating shutdown from the instance with shutdown behavior set to `Terminate`.
 2. Once an instance is launched, the user cannot change the availability zone of that instance unless he creates an AMI of that instance and launches a new instance from it.
 3. AMI ID is different for different region even the image is the same.
@@ -48,7 +48,7 @@ This is the revision note for AWS solution architect associate exam.
 7. Convertible reserved instance can be exchanged during the term for another convertible reserved instance with new attributes including instance family, instance type, platform, scope, or tenancy. You can also modify some attributes of a convertible reserved instance the same way as standard reserved instance.
 8. Instance size flexibility is determined by the normalization factor of the instance size. The discount applies either fully or partially to running instances of the same instance family, depending on the instance size of the reservation, in any Availability Zone in the Region. The only attributes that must be matched are the instance family, tenancy, and platform. [Reference](https://docs.aws.amazon.com/en_us/AWSEC2/latest/UserGuide/apply_ri.html).
 
-## Compute: Auto Scaling
+## Compute: EC2 Auto Scaling ([FAQ](https://aws.amazon.com/ec2/autoscaling/faqs/))
 1. A running EC2 instance can be added to a new auto scaling group.
 2. [From CloudAcademy, not verified] A running EC2 instance can also be added to an existing auto scaling group, but only limited to auto scaling group using EC2 launch template and not auto scaling group using auto scaling launch configuration.
 3. EC2 instance can also be detached from existing auto scaling group.
@@ -77,7 +77,7 @@ This is the revision note for AWS solution architect associate exam.
 	* ExactCapcity
 	* PercentChangeInCapacity
 
-## Storage: S3
+## Storage: S3 ([FAQ](https://aws.amazon.com/s3/faqs/))
 1. Cross-region replication requires versioning on both source bucket and destination bucket. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/crr.html).
 2. Cross-region replication requires the source bucket owner have the source and destination AWS Regions enabled. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/crr.html).
 3. To use server-side encryption with customer-provided encryption keys (SSE-C), encryption key and other related information need to be provided in each API call via HTTP headers. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerSideEncryptionCustomerKeys.html).
@@ -102,7 +102,7 @@ This is the revision note for AWS solution architect associate exam.
 3. Data stored on EBS is automatically replicated within an availability zone, but does not replicate cross availability zone.
 4. An EBS-optimized instance provides additional, dedicated throughput for Amazon EBS I/O. This provides improved performance for your Amazon EBS volumes and enables instances to use provisioned IOPs fully. For example, using a t2.micro instance with high IOPS EBS volume will not deliver IOPS as the network link is shared between EBS I/O and network I/O.
 
-## Storage: RDS
+## Storage: RDS ([FAQ](https://aws.amazon.com/rds/faqs/))
 1. In RDS, multi-AZ and read replica are different. Standby instance in multi-AZ is not read accessible.
 2. RDS reserved instance is similiar to EC2 standard regional reserved instance with instance size flexibility.
 
@@ -130,7 +130,7 @@ This is the revision note for AWS solution architect associate exam.
 	* Multivalue answer rule
 	* Weighted rule
 
-## Network: ELB
+## Network: ELB ([FAQ](https://aws.amazon.com/elasticloadbalancing/faqs/))
 ### Classic load balancer
 1. Classic load balancer supports the following protocols:
 	* Layer 4
