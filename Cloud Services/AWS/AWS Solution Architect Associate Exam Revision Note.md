@@ -29,6 +29,10 @@ This is the revision note for AWS solution architect associate exam.
 3. AMI ID is different for different region even the image is the same.
 4. *InstanceLimitExceeded* error occur when you have reached the limit on the number of instances that you can launch in a region.
 5. *InsufficientInstanceCapacity* error occur when AWS does not currently have enough available On-Demand capacity to service your request.
+6. EC2 has 3 types of tenancy:
+	* Default, which your instance runs on shared hardware.
+	* Dedicated or dedicated instance, which your instance runs on single-tenant hardware.
+	* Host or dedicated host, which your instance runs on a dedicated host, which is an isolated server with configurations that you can control.
 ### Scheduled instance ([Reference](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-scheduled-instances.html))
 1. Scheduled instance cannot be stopped or rebooted, only manual termination is allowd. After terminated for a few minutes, it can be relaunch again.
 2. Scheduled instance is terminated three minutes before the end of the current scheduled time period.
@@ -116,6 +120,10 @@ This is the revision note for AWS solution architect associate exam.
 1. There are 2 types of Redis clusters (a.k.a replication groups in API/CLI). They are Redis (cluster mode disabled) cluster and Redis (cluster mode enabled) cluster.
 2. One Redis node with 0 to 5 Redis replica node form a shard (a.k.a node group in API/CLI). Redis (cluster mode disabled) cluster only contain 1 shard. Redis (cluster mode enabled) cluster can contain 1 to 90 shard.
 3. Redis replica node provide high availibity and read throughput. If the write node failed, it is possible to failover to the replica node.
+
+## Storage: CloudFront
+1. CloudFront signed URLs and signed cookies allow you to control who can access your content so that you can serve private content through CloudFront. [Reference](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-choosing-signed-urls-cookies.html).
+2. Origin access identity should be used to allow only CloudFront to access the private content on S3 and not allow users to direct access S3. [Reference](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html).
 
 ## Network: VPC
 1. Security groups actually applies to ENI (elastic network interface), not EC2 instance or Lambda or RDS.
