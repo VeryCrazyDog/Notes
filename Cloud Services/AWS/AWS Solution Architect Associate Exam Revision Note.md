@@ -18,6 +18,10 @@ This is the revision note for AWS solution architect associate exam.
 1. No prior AWS approval is required for penetration test on some AWS services such as EC2, RDS, CloudFront, API Gateway, etc. ([Reference](https://aws.amazon.com/security/penetration-testing/))
 ### AWS
 1. AWS assigns two unique IDs to each AWS account: an AWS account ID and a canonical user ID. The AWS account ID is a 12-digit number, such as 123456789012. The canonical user ID is a long string, such as 79a59df900b949e55d96a1e698fbacedfd6e09d98eacf8f8d5218e7cd47ef2be.
+2. Besides EC2 and RDS, reserved resources with discounted price are also available for:
+	* ElastiCache
+	* DynamoDB
+	* Redshift
 
 ## Compute: EC2
 1. Termination Protection only prevent termination by API (AWS console and CLI also use API), and does not prevent you from terminating an instance by initiating shutdown from the instance with shutdown behavior set to `Terminate`.
@@ -31,6 +35,18 @@ This is the revision note for AWS solution architect associate exam.
 3. After you purchase a scheduled instance, you can't cancel, modify, or resell your purchase.
 4. As of 2019-06-26, the required term is 365 days (one year).
 5. As of 2019-06-26, the minimum required utilization is 1,200 hours per year. From AWS console, the total schedule duration should be greater than 1,200hrs/year, 100hrs/month, 24hrs/week, or 4hrs/day.
+### Reserved instance
+1. There are two scope of reserved instance. One is zonal and one is regional. Both are costing the same. [Reference](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/reserved-instances-scope.html).
+2. Zonal reserved instances provide no availability zone flexibility and no instance size flexibility whereas regional do. [Reference](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/reserved-instances-scope.html).
+3. Regional reserved instances provide no capacity reservation whereas zonal do. [Reference](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/reserved-instances-scope.html).
+4. There are two type of offering classes: standard and convertible.
+5. Standard reserved instances can be sold in the Reserved Instance Marketplace whereas convertible reserved instances cannot.
+6. You cannot exchange a standard reserved instance. Only modification is allowed. Instance family cannot be modified. However some attributes are allowed to be changed during the term. These includes:
+	* Scope, to change between regional and zonal.
+	* Availability zones in the same region for regional reserved instances.
+	* Instance size, but only apply to Amazon Linux on default tenancy.
+7. Convertible reserved instance can be exchanged during the term for another convertible reserved instance with new attributes including instance family, instance type, platform, scope, or tenancy. You can also modify some attributes of a convertible reserved instance the same way as standard reserved instance.
+8. Instance size flexibility is determined by the normalization factor of the instance size. The discount applies either fully or partially to running instances of the same instance family, depending on the instance size of the reservation, in any Availability Zone in the Region. The only attributes that must be matched are the instance family, tenancy, and platform. [Reference](https://docs.aws.amazon.com/en_us/AWSEC2/latest/UserGuide/apply_ri.html).
 
 ## Compute: Auto Scaling
 1. A running EC2 instance can be added to a new auto scaling group.
@@ -88,6 +104,7 @@ This is the revision note for AWS solution architect associate exam.
 
 ## Storage: RDS
 1. In RDS, multi-AZ and read replica are different. Standby instance in multi-AZ is not read accessible.
+2. RDS reserved instance is similiar to EC2 standard regional reserved instance with instance size flexibility.
 
 ## Storage: ElastiCache ([FAQ](https://aws.amazon.com/elasticache/faqs/))
 1. Data partitioning is supported in memcached and Redis (cluster mode enabled) cluster.
@@ -139,4 +156,3 @@ This is the revision note for AWS solution architect associate exam.
 6. Classic load balancer attaches to subnet level.
 7. Classic load balancer is actually a fleet of EC2 instances.
 8. Classic load balancer requires at least 1 subnet to be selected to route traffic to, but recommend to select 2 subnets in 2 different AZ to provide high availability on the classic load balancer.
-
