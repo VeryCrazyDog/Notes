@@ -51,6 +51,7 @@ This is the revision note for AWS solution architect associate exam.
 	* Instance size, but only apply to Amazon Linux on default tenancy.
 7. Convertible reserved instance can be exchanged during the term for another convertible reserved instance with new attributes including instance family, instance type, platform, scope, or tenancy. You can also modify some attributes of a convertible reserved instance the same way as standard reserved instance.
 8. Instance size flexibility is determined by the normalization factor of the instance size. The discount applies either fully or partially to running instances of the same instance family, depending on the instance size of the reservation, in any Availability Zone in the Region. The only attributes that must be matched are the instance family, tenancy, and platform. [Reference](https://docs.aws.amazon.com/en_us/AWSEC2/latest/UserGuide/apply_ri.html).
+9. Reserved instances do not apply to Spot instances or instances running on Dedicated Hosts. To lower the cost of using Dedicated Hosts, purchase Dedicated Host Reservations.
 
 ## Compute: EC2 Auto Scaling
 1. A running EC2 instance can be added to a new auto scaling group.
@@ -105,6 +106,7 @@ This is the revision note for AWS solution architect associate exam.
 2. SSD vs HDD is not about cost or speed. It is about random access vs sequel access.
 3. Data stored on EBS is automatically replicated within an availability zone, but does not replicate cross availability zone.
 4. An EBS-optimized instance provides additional, dedicated throughput for Amazon EBS I/O. This provides improved performance for your Amazon EBS volumes and enables instances to use provisioned IOPs fully. For example, using a t2.micro instance with high IOPS EBS volume will not deliver IOPS as the network link is shared between EBS I/O and network I/O.
+5. Snapshots can be done in real time while the volume is attached and in use. Although volumes do not need to be un-mounted while taking a snapshot, it is recommended to do so to ensure consistent snapshots on volumes.
 
 ## Storage: RDS ([FAQ](https://aws.amazon.com/rds/faqs/))
 1. In RDS, multi-AZ and read replica are different. Standby instance in multi-AZ is not read accessible.
