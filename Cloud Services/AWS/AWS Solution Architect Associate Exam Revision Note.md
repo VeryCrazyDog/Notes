@@ -93,6 +93,7 @@ This is the revision note for AWS solution architect associate exam.
 8. Only list and write access are avaiable to grant in bucket ACL. To grant read access to object in a bucket, object ACL should be used.
 9. Objects uploaded to a bucket by another account don't automatically inherit the permissions defined in the bucket policy. The bucket owner must take ownership of the object for the bucket policy to apply. [Reference](https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-acl-email-error/).
 10. To allow another account to upload objects to your bucket, it's a best practice to create an AWS Identity and Access Management (IAM) role from your account that the other account can assume. [Reference](https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-acl-email-error/).
+11. Versioning's Multi-Factor Authentication (MFA) Delete capability can be used to provide an additional layer of security. Only delete action is covered by MFA delete.
 
 ## Storage: Storage Gateway
 1. There are 3 types of gateways:
