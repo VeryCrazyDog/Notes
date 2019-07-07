@@ -94,6 +94,15 @@ This is the revision note for AWS solution architect associate exam.
 9. Objects uploaded to a bucket by another account don't automatically inherit the permissions defined in the bucket policy. The bucket owner must take ownership of the object for the bucket policy to apply. [Reference](https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-acl-email-error/).
 10. To allow another account to upload objects to your bucket, it's a best practice to create an AWS Identity and Access Management (IAM) role from your account that the other account can assume. [Reference](https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-acl-email-error/).
 11. Versioning's Multi-Factor Authentication (MFA) Delete capability can be used to provide an additional layer of security. Only delete action is covered by MFA delete.
+12. List of S3 storage classes:
+	* Standard
+	* Standard infrequent access
+	* One zone infrequent access
+	* Intelligent-Tiering
+	* Reduced redundancy storage (RRS), no longer advertised on AWS
+	* Glacier
+	* Glacier deep archive
+13. Cross-region replication can set up replication at a bucket level, a shared prefix level, or an object level using S3 object tags.
 
 ## Storage: Storage Gateway
 1. There are 3 types of gateways:
