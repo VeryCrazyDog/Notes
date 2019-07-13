@@ -103,6 +103,15 @@ This is the revision note for AWS solution architect associate exam.
 	* Glacier
 	* Glacier deep archive
 13. Cross-region replication can set up replication at a bucket level, a shared prefix level, or an object level using S3 object tags.
+14. Individual Amazon S3 objects can range in size from a minimum of 0 bytes to a maximum of 5 terabytes.
+15. The largest object that can be uploaded in a single PUT is 5 gigabytes. For objects larger than 100 megabytes, customers should consider using the Multipart Upload capability.
+16. Objects stored in the S3 One Zone-IA storage class are stored redundantly within a single Availability Zone in the AWS Region you select
+17. Encryption options are:
+	* Server side encryptions:
+		* SSE-S3, using AWS managed keys
+		* SSE-C, using customer provided keys
+		* SSE-KMS, using customer managed keys on AWS KMS
+	* Client side encryption
 
 ## Storage: Storage Gateway
 1. There are 3 types of gateways:
