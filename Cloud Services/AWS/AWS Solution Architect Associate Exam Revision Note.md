@@ -81,6 +81,7 @@ This is the revision note for AWS solution architect associate exam.
 	* ChangeInCapacity
 	* ExactCapcity
 	* PercentChangeInCapacity
+10. By default auto scaling use EC2 status checks, however it can also use additional ELB health checks, or set up custom health checks by setting the health status to auto scaling directly.
 
 ## Storage: S3 ([FAQ](https://aws.amazon.com/s3/faqs/))
 1. Cross-region replication requires versioning on both source bucket and destination bucket. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/crr.html).
