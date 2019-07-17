@@ -112,6 +112,7 @@ This is the revision note for AWS solution architect associate exam.
 		* SSE-C, using customer provided keys
 		* SSE-KMS, using customer managed keys on AWS KMS
 	* Client side encryption
+18. Amazon S3 provides read-after-write consistency for PUTS of new objects in your S3 bucket in all regions with one caveat. The caveat is that if you make a HEAD or GET request to the key name (to find if the object exists) before creating the object, Amazon S3 provides eventual consistency for read-after-write. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/Introduction.html). To remember this, think S3 is running with cache.
 
 ## Storage: Storage Gateway
 1. There are 3 types of gateways:
@@ -130,6 +131,9 @@ This is the revision note for AWS solution architect associate exam.
 ## Storage: RDS ([FAQ](https://aws.amazon.com/rds/faqs/))
 1. In RDS, multi-AZ and read replica are different. Standby instance in multi-AZ is not read accessible.
 2. RDS reserved instance is similiar to EC2 standard regional reserved instance with instance size flexibility.
+
+## Storage: DynamoDB
+1. Local secondary index is an index that has the same hash key as the table, but a different range key. Global secondary index is an index with a hash and range key that can be different from those on the table.
 
 ## Storage: ElastiCache
 1. Data partitioning is supported in memcached and Redis (cluster mode enabled) cluster.
@@ -187,3 +191,7 @@ This is the revision note for AWS solution architect associate exam.
 8. Classic load balancer requires at least 1 subnet to be selected to route traffic to, but recommend to select 2 subnets in 2 different AZ to provide high availability on the classic load balancer.
 
 ## Messaging: SQS ([FAQ](https://aws.amazon.com/sqs/faqs/))
+1. Receivers have to poll or pull messages from SQS.
+
+## Messaging: SNS
+1. Messages are pushed to subscribers as and when they are sent by publishers to SNS.
