@@ -52,6 +52,13 @@ This is the revision note for AWS solution architect associate exam.
 7. Convertible reserved instance can be exchanged during the term for another convertible reserved instance with new attributes including instance family, instance type, platform, scope, or tenancy. You can also modify some attributes of a convertible reserved instance the same way as standard reserved instance.
 8. Instance size flexibility is determined by the normalization factor of the instance size. The discount applies either fully or partially to running instances of the same instance family, depending on the instance size of the reservation, in any Availability Zone in the Region. The only attributes that must be matched are the instance family, tenancy, and platform. [Reference](https://docs.aws.amazon.com/en_us/AWSEC2/latest/UserGuide/apply_ri.html).
 9. Reserved instances do not apply to Spot instances or instances running on Dedicated Hosts. To lower the cost of using Dedicated Hosts, purchase Dedicated Host Reservations.
+### Placement group
+1. There are 3 types of placement groups:
+	* Cluster
+	* Partition
+	* Spread
+2. For partition type place groups, an additional parameter, number of partitions, is also needed to specify.
+3. Moving instances into and out of placement groups is possible by shutting down the instances and execute `modify-instance-placement` command.
 
 ## Compute: EC2 Auto Scaling
 1. A running EC2 instance can be added to a new auto scaling group.
@@ -114,6 +121,7 @@ This is the revision note for AWS solution architect associate exam.
 		* SSE-KMS, using customer managed keys on AWS KMS
 	* Client side encryption
 18. Amazon S3 provides read-after-write consistency for PUTS of new objects in your S3 bucket in all regions with one caveat. The caveat is that if you make a HEAD or GET request to the key name (to find if the object exists) before creating the object, Amazon S3 provides eventual consistency for read-after-write. [Reference](https://docs.aws.amazon.com/AmazonS3/latest/dev/Introduction.html). To remember this, think S3 is running with cache.
+19. S3 versioning is either enabled or suspended. By default it is suspended.
 
 ## Storage: Storage Gateway
 1. There are 3 types of gateways:
