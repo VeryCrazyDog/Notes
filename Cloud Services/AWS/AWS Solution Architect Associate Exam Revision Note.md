@@ -136,6 +136,7 @@ This is the revision note for AWS solution architect associate exam.
 3. Data stored on EBS is automatically replicated within an availability zone, but does not replicate cross availability zone.
 4. An EBS-optimized instance provides additional, dedicated throughput for Amazon EBS I/O. This provides improved performance for your Amazon EBS volumes and enables instances to use provisioned IOPs fully. For example, using a t2.micro instance with high IOPS EBS volume will not deliver IOPS as the network link is shared between EBS I/O and network I/O.
 5. Snapshots can be done in real time while the volume is attached and in use. Although volumes do not need to be un-mounted while taking a snapshot, it is recommended to do so to ensure consistent snapshots on volumes.
+6. RAID 5 and RAID 6 are not recommended for Amazon EBS because the parity write operations of these RAID modes consume some of the IOPS available to your volumes. [Reference](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/raid-config.html).
 
 ## Storage: RDS ([FAQ](https://aws.amazon.com/rds/faqs/))
 1. In RDS, multi-AZ and read replica are different. Standby instance in multi-AZ is not read accessible.
