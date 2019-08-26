@@ -1,4 +1,4 @@
-# Find Hardware Information
+# Find hardware information
 
 Find CPU model
 ```bat
@@ -13,6 +13,13 @@ wmic cpu get /format:list | find /i "deviceid" | find /c /i "cpu"
 Find the number of cores per CPU (Not available on all Windows version):
 ```bat
 wmic cpu get /format:list | find /i "core"
+```
+
+# Active directory
+
+Get AD group names a user is a member of
+```bat
+dsquery user -samid <ad_username> | dsget user -memberof | dsget group -samid
 ```
 
 # Others
