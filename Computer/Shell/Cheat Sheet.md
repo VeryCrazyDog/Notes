@@ -92,3 +92,11 @@ EOT
 sleep 2
 ) | telnet smtpserver.com 25
 ```
+
+File housekeep commands
+```bash
+# Delete files in folder `/<path_to_folder_to_delete_files>` which is modified 180 days ago, and generate log files in `/<log_folder_path>`
+/bin/find "/<path_to_folder_to_delete_files>" -type f -mtime +180 -exec /bin/rm -v {} \; >> "/<log_folder_path>/<log_file_prefix>_$(date +'%Y%m%d%H%M%S').log"
+# Delete files in log folder `/<log_folder_path>` which is modified 180 days ago
+/bin/find "/<log_folder_path>" -type f -mtime +180 -exec /bin/rm -v {} \; > /dev/null
+```
