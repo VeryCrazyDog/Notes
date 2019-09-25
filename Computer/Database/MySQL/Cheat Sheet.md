@@ -39,6 +39,13 @@ WHERE table_schema = DATABASE()
 ORDER BY total_gigabytes DESC;
 ```
 
+## Session Information
+
+Find locks
+```sql
+SELECT * FROM sys.innodb_lock_waits;
+```
+
 # Import and Export
 
 Export all tables, stored procedures, functions and data in a schema using SQL format, with no `CREATE DATABASE` statement
