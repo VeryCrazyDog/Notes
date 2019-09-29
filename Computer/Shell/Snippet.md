@@ -9,7 +9,10 @@ fi
 A simple function for backup purpose
 ```sh
 mkbak() {
-	sudo cp -pv "$1" "${1}.$(date +"%Y%m%d%H%M%S").bak"
+	for arg in "$@"
+	do
+		sudo cp -pv "${arg}" "${arg}.$(date +"%Y%m%d%H%M%S").bak"
+	done
 }
 ```
 
