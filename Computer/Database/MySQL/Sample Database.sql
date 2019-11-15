@@ -31,12 +31,14 @@ CREATE TABLE teachers (
 CREATE TABLE courses (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	name VARCHAR(50) NOT NULL,
+	code VARCHAR(10) NOT NULL,
 	location VARCHAR(50) NOT NULL,
 	teacher_id INT,
 	version INT NOT NULL DEFAULT 1,
 	created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	modified_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	INDEX ix_name (name),
+	UNIQUE uk_code (code),
 	CONSTRAINT fk_courses_teachers_id FOREIGN KEY (teacher_id) REFERENCES teachers(id)
 );
 
@@ -79,17 +81,17 @@ INSERT teachers (id, name, code, gender) VALUES
 	(9, 'Issac', 'teacher9', 'M'),
 	(10, 'Jack', 'teacher10', 'M');
 
-INSERT courses (id, name, location, teacher_id) VALUES
-	(1, 'Chinese', 'Lecture Theatre A', 1),
-	(2, 'English', 'Room 1', 2),
-	(3, 'Maths', 'Lecture Theatre B', 2),
-	(4, 'Physics', 'Room 2', 3),
-	(5, 'Chemistry', 'Lecture Theatre C', 6),
-	(6, 'Biology', 'Room 3', 7),
-	(7, 'Geography', 'Lecture Theatre D', 7),
-	(8, 'Economics', 'Room 4', 7),
-	(9, 'Accounting', 'Lecture Theatre E', 8),
-	(10, 'Chinese History', 'Room 5', NULL);
+INSERT courses (id, name, code, location, teacher_id) VALUES
+	(1, 'Chinese', 'course01', 'Lecture Theatre A', 1),
+	(2, 'English', 'course02', 'Room 1', 2),
+	(3, 'Maths', 'course03', 'Lecture Theatre B', 2),
+	(4, 'Physics', 'course04', 'Room 2', 3),
+	(5, 'Chemistry', 'course05', 'Lecture Theatre C', 6),
+	(6, 'Biology', 'course06', 'Room 3', 7),
+	(7, 'Geography', 'course07', 'Lecture Theatre D', 7),
+	(8, 'Economics', 'course08', 'Room 4', 7),
+	(9, 'Accounting', 'course09', 'Lecture Theatre E', 8),
+	(10, 'Chinese History', 'course10', 'Room 5', NULL);
 
 INSERT students_courses(student_id, course_id, registered_date) VALUES
 	(1, 1, '2005-09-01'),
