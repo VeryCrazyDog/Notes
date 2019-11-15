@@ -5,40 +5,45 @@ USE school;
 
 CREATE TABLE students (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	name VARCHAR(50) NOT NULL DEFAULT '',
-	code VARCHAR(50) NOT NULL DEFAULT '',
-	gender CHAR NOT NULL,
+	name VARCHAR(50) NOT NULL,
+	code VARCHAR(10) NOT NULL,
+	gender CHAR,
 	birthday DATE,
 	version INT NOT NULL DEFAULT 1,
 	created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	modified_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	INDEX ix_students_name (name)
+	INDEX ix_name (name),
+	UNIQUE uk_code (code)
 );
 
 CREATE TABLE teachers (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	name VARCHAR(50) NOT NULL DEFAULT '',
-	code VARCHAR(50) NOT NULL DEFAULT '',
-	gender CHAR NOT NULL,
+	name VARCHAR(50) NOT NULL,
+	code VARCHAR(10) NOT NULL,
+	gender CHAR,
+	version INT NOT NULL DEFAULT 1,
 	created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	modified_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	INDEX ix_teachers_name (name)
+	INDEX ix_name (name),
+	UNIQUE uk_code (code)
 );
 
 CREATE TABLE courses (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	name VARCHAR(50) NOT NULL DEFAULT '',
-	location VARCHAR(50) NOT NULL DEFAULT '',
+	name VARCHAR(50) NOT NULL,
+	location VARCHAR(50) NOT NULL,
 	teacher_id INT,
+	version INT NOT NULL DEFAULT 1,
 	created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	modified_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	INDEX ix_courses_name (name),
+	INDEX ix_name (name),
 	CONSTRAINT fk_courses_teachers_id FOREIGN KEY (teacher_id) REFERENCES teachers(id)
 );
 
 CREATE TABLE students_courses (
 	student_id INT NOT NULL,
 	course_id INT NOT NULL,
+	registered_date DATE NOT NULL,
 	created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	modified_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (student_id, course_id),
@@ -59,14 +64,14 @@ INSERT students (id, name, code, gender, birthday, version) VALUES
 	(9, 'Ivan', 'student9', 'M', '1982-09-09', 3),
 	(10, 'Janice', 'student10', 'F', '1983-10-10', 3),
 	(11, 'Keith', 'student11', 'M', '1983-11-11', 4),
-	(12, 'Ling', 'student12', 'F', '1982-12-12', 4),
+	(12, 'Ling', 'student12', NULL, '1982-12-12', 4),
 	(13, 'April', 'student13', 'F', '1980-01-13', 2);
 
 INSERT teachers (id, name, code, gender) VALUES
 	(1, 'Andrew', 'teacher1', 'M'),
 	(2, 'Boris', 'teacher2', 'M'),
 	(3, 'Carol', 'teacher3', 'F'),
-	(4, 'Doris', 'teacher4', 'F'),
+	(4, 'Doris', 'teacher4', NULL),
 	(5, 'Edison', 'teacher5', 'M'),
 	(6, 'Fiona', 'teacher6', 'F'),
 	(7, 'Grace', 'teacher7', 'F'),
@@ -84,21 +89,21 @@ INSERT courses (id, name, location, teacher_id) VALUES
 	(7, 'Geography', 'Lecture Theatre D', 7),
 	(8, 'Economics', 'Room 4', 7),
 	(9, 'Accounting', 'Lecture Theatre E', 8),
-	(10, 'History', 'Room 5', NULL);
+	(10, 'Chinese History', 'Room 5', NULL);
 
-INSERT students_courses(student_id, course_id) VALUES
-	(1, 1),
-	(1, 2),
-	(1, 3),
-	(2, 2),
-	(2, 4),
-	(5, 1),
-	(5, 4),
-	(5, 8),
-	(5, 9),
-	(5, 10),
-	(8, 3),
-	(9, 3),
-	(9, 8),
-	(12, 3),
-	(12, 8);
+INSERT students_courses(student_id, course_id, registered_date) VALUES
+	(1, 1, '2005-09-01'),
+	(1, 2, '2005-09-01'),
+	(1, 3, '2005-09-01'),
+	(2, 2, '2005-09-01'),
+	(2, 4, '2005-09-15'),
+	(5, 1, '2005-09-01'),
+	(5, 4, '2005-09-01'),
+	(5, 8, '2005-10-02'),
+	(5, 9, '2005-09-01'),
+	(5, 10, '2005-09-01'),
+	(8, 3, '2005-09-13'),
+	(9, 3, '2005-09-01'),
+	(9, 8, '2005-09-01'),
+	(12, 3, '2005-09-01'),
+	(12, 8, '2005-09-01');
