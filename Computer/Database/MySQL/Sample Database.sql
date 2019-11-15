@@ -32,7 +32,7 @@ CREATE TABLE courses (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	name VARCHAR(50) NOT NULL,
 	code VARCHAR(10) NOT NULL,
-	location VARCHAR(50) NOT NULL,
+	location VARCHAR(50) NOT NULL DEFAULT '',
 	teacher_id INT,
 	version INT NOT NULL DEFAULT 1,
 	created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -89,9 +89,9 @@ INSERT courses (id, name, code, location, teacher_id) VALUES
 	(5, 'Chemistry', 'course05', 'Lecture Theatre C', 6),
 	(6, 'Biology', 'course06', 'Room 3', 7),
 	(7, 'Geography', 'course07', 'Lecture Theatre D', 7),
-	(8, 'Economics', 'course08', 'Room 4', 7),
+	(8, 'Economics', 'course08', 'Room 2', 7),
 	(9, 'Accounting', 'course09', 'Lecture Theatre E', 8),
-	(10, 'Chinese History', 'course10', 'Room 5', NULL);
+	(10, 'Chinese History', 'course10', '', NULL);
 
 INSERT students_courses(student_id, course_id, registered_date) VALUES
 	(1, 1, '2005-09-01'),
