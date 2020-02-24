@@ -1,0 +1,22 @@
+{
+	"env": { "node": true, "es6": true },
+	"parserOptions": { "sourceType": "script" },
+	"rules": {
+		"complexity": "error",
+		"global-require": "error",
+		"max-depth": "error",
+		"max-len": [ "error", { "code": 120 } ],
+		"no-shadow": [ "error", { "builtinGlobals": true } ],
+		"no-var": "error",
+		"prefer-rest-params": "error",
+		"prefer-spread": "error",
+		"strict": "error"
+	},
+	"overrides": [
+		{
+			"files": [ "*.test.js" ],
+			"env": { "mocha": true },
+			"rules": { "no-unused-expressions": "off" }
+		}
+	]
+}
