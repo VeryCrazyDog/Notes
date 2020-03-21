@@ -19,7 +19,7 @@ loglevelPrefix.apply(loglevel, {
 })
 
 // Apply our log level
-if (process.env.LOG_LEVEL) {
+if (process.env.LOG_LEVEL && process.env.LOG_LEVEL.toUpperCase() in loglevel.levels) {
   loglevel.setLevel(process.env.LOG_LEVEL)
 }
 
