@@ -23,7 +23,7 @@ if (process.env.LOG_LEVEL && process.env.LOG_LEVEL.toUpperCase() in loglevel.lev
   loglevel.setLevel(process.env.LOG_LEVEL)
 }
 
-// Add extra function
+// Add extra function, notice this will not applied to logger returned from getLogger()
 loglevel.getLevelDescription = function () {
   return levelDescriptions[this.getLevel()]
 }
