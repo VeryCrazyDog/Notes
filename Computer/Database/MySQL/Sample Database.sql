@@ -1,8 +1,14 @@
+-- -----------------------------------------------------------------------------
+-- Create database
+-- -----------------------------------------------------------------------------
 DROP DATABASE IF EXISTS school;
 CREATE DATABASE school DEFAULT CHARACTER SET utf8mb4;
 
 USE school;
 
+-- -----------------------------------------------------------------------------
+-- Create tables
+-- -----------------------------------------------------------------------------
 CREATE TABLE students (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	name VARCHAR(50) NOT NULL,
@@ -54,6 +60,70 @@ CREATE TABLE students_courses (
 	CONSTRAINT fk_students_courses_courses_id FOREIGN KEY (course_id) REFERENCES courses(id)
 );
 
+CREATE TABLE students_history (
+	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	student_id INT NOT NULL,
+	version INT NOT NULL,
+	action CHAR NOT NULL,
+	action_time TIMESTAMP NOT NULL,
+	name VARCHAR(50) NOT NULL,
+	code VARCHAR(10) NOT NULL,
+	gender CHAR,
+	birthday DATE,
+	created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	modified_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	UNIQUE uk_student_id_version (student_id, version)
+);
+
+-- -----------------------------------------------------------------------------
+-- Create triggers
+-- -----------------------------------------------------------------------------
+DELIMITER $$
+
+CREATE /* DEFINER = `root`@`%` */ TRIGGER students_after_insert AFTER INSERT ON students FOR EACH ROW
+BEGIN
+	INSERT INTO students_history SET
+		student_id = NEW.id,
+		version = NEW.version,
+		action = 'A',
+		action_time = NEW.created_time,
+		name = NEW.name,
+		code = NEW.code,
+		gender = NEW.gender,
+		birthday = NEW.birthday;
+END$$
+
+CREATE /* DEFINER = `root`@`%` */ TRIGGER students_after_update AFTER UPDATE ON students FOR EACH ROW
+BEGIN
+	INSERT INTO students_history SET
+		student_id = NEW.id,
+		version = NEW.version,
+		action = 'M',
+		action_time = NEW.modified_time,
+		name = NEW.name,
+		code = NEW.code,
+		gender = NEW.gender,
+		birthday = NEW.birthday;
+END$$
+
+CREATE /* DEFINER = `root`@`%` */ TRIGGER students_after_delete AFTER DELETE ON students FOR EACH ROW
+BEGIN
+	INSERT INTO students_history SET
+		student_id = OLD.id,
+		version = OLD.version + 1,
+		action = 'D',
+		action_time = CURRENT_TIMESTAMP,
+		name = OLD.name,
+		code = OLD.code,
+		gender = OLD.gender,
+		birthday = OLD.birthday;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------
+-- Insert initial data
+-- -----------------------------------------------------------------------------
 INSERT students (id, name, code, gender, birthday, version) VALUES
 	(1, 'Amy', 'student1', 'F', '1980-01-01', 1),
 	(2, 'Benny', 'student2', 'M', '1981-02-02', 1),
@@ -109,3 +179,10 @@ INSERT students_courses(student_id, course_id, registered_date) VALUES
 	(9, 8, '2005-09-01'),
 	(12, 3, '2005-09-01'),
 	(12, 8, '2005-09-01');
+
+-- -----------------------------------------------------------------------------
+-- Update data to trigger trigger
+-- -----------------------------------------------------------------------------
+UPDATE (SELECT SLEEP(1)) dummy, students
+	SET gender = 'F', version = version + 1
+	WHERE name = 'Ling';

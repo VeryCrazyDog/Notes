@@ -14,9 +14,9 @@ Find the total number of indexes for all tables in a database
 ```sql
 SELECT table_name, COUNT(*) as total_indexes
 FROM (
-	SELECT DISTINCT table_name, index_name
-	FROM information_schema.statistics
-	WHERE table_schema = DATABASE()
+  SELECT DISTINCT table_name, index_name
+  FROM information_schema.statistics
+  WHERE table_schema = DATABASE()
 ) s
 GROUP BY table_name
 ORDER BY total_indexes DESC;
@@ -28,12 +28,12 @@ Find size of each table and associated indexes
 
 ```sql
 SELECT
-	table_name,
-	table_rows,
-	avg_row_length,
-	ROUND((data_length / 1024 / 1024 / 1024), 2) table_gigabytes,
-	ROUND((index_length / 1024 / 1024 / 1024), 2) index_gigabytes,
-	ROUND(((data_length + index_length) / 1024 / 1024 / 1024), 2) total_gigabytes
+  table_name,
+  table_rows,
+  avg_row_length,
+  ROUND((data_length / 1024 / 1024 / 1024), 2) table_gigabytes,
+  ROUND((index_length / 1024 / 1024 / 1024), 2) index_gigabytes,
+  ROUND(((data_length + index_length) / 1024 / 1024 / 1024), 2) total_gigabytes
 FROM information_schema.tables
 WHERE table_schema = DATABASE()
 ORDER BY total_gigabytes DESC;
