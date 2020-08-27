@@ -17,5 +17,8 @@ Below is the list of modules useful for development.
 ## HTTP client
 - got: https://www.npmjs.com/package/got
 
+## Scripting
+- tasksfile: https://www.npmjs.com/package/tasksfile
+
 ## Packaging
 - npm-pack-zip: https://www.npmjs.com/package/npm-pack-zip
