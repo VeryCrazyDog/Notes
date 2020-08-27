@@ -1,0 +1,9 @@
+[user]
+	name = VCD
+	email = VeryCrazyDog@gmail.com
+[core]
+	autocrlf = false
+[pull]
+	ff = only
+[fetch]
+	prune = true
