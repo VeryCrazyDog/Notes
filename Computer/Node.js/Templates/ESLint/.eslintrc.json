@@ -1,11 +1,14 @@
 {
+	"root": true,
+	"extends": "standard",
 	"env": { "node": true, "es6": true },
 	"parserOptions": { "sourceType": "script" },
 	"rules": {
 		"complexity": "error",
 		"global-require": "error",
 		"max-depth": "error",
-		"max-len": [ "error", { "code": 120 } ],
+		"max-len": [ "error", { "code": 120, "ignoreUrls": true } ],
+		"no-console": "error",
 		"no-shadow": [ "error", { "builtinGlobals": true } ],
 		"no-var": "error",
 		"prefer-rest-params": "error",
