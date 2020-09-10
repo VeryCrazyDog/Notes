@@ -7,11 +7,36 @@ echo "Hello World" > filename.txt 2>&1
 echo "Hello World" &> filename.txt
 ```
 
+Enable exit on error and on undefined variables, enable exit code of a pipeline to that of the rightmost command to exit with a non-zero status, and output the error line using trap
+```sh
+set -euo pipefail
+trap 'echo "[ERROR] ${BASH_SOURCE}:${LINENO} ${BASH_COMMAND}" >&2' ERR
+```
+
 Enable exit on error, reference http://blog.jobbole.com/111514/
 ```sh
-set -o errexit
-# Shortform, same as above
 set -e
+# Long form, same as above
+set -o errexit
+```
+
+Enable exit on undefined variables, reference http://blog.jobbole.com/111514/
+```sh
+set -u
+# Long form, same as above
+set -o nounset
+```
+
+Enable print each command before executing it, reference https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+```sh
+set -x
+# Long form, same as above
+set -o xtrace
+```
+
+Enable command in shell function inherit ERR trap, reference https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+```sh
+set -E
 ```
 
 However, application writers should avoid relying on `set -e` within functions. For example, in the following script:
@@ -31,19 +56,6 @@ To run command without exit on failure while having `-e` setting enabled, use `|
 not_exist_command || :
 # Alternatively execute true command
 not_exist_command || true
-```
-
-Enable exit on undefined variables, reference http://blog.jobbole.com/111514/
-```sh
-set -o nounset
-# Shortform, same as above
-set -u
-```
-
-Enable exit on error and on undefined variables, and output the error line using trap
-```sh
-set -eu
-trap 'echo "[ERROR] Internal error. ${BASH_SOURCE}:${LINENO} ${BASH_COMMAND}" >&2' ERR
 ```
 
 Use lowercase with underscores for local variables, uppercase with underscores for environment variables and internal shell variables. Reference https://stackoverflow.com/questions/673055/correct-bash-and-shell-script-variable-capitalization
