@@ -1,3 +1,4 @@
+# This is Git's per-user configuration file.
 [user]
 	name = VCD
 	email = VeryCrazyDog@gmail.com
@@ -7,3 +8,4 @@
 	ff = only
 [fetch]
 	prune = true
+	pruneTags = true
