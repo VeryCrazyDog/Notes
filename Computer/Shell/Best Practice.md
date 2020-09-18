@@ -1,16 +1,17 @@
 Use explicit form of redirection, reference http://wiki.bash-hackers.org/scripting/obsolete
 ```sh
 # Explicit redirection for both stdin and stdout, preferred
-echo "Hello World" > filename.txt 2>&1
+echo "Hello World" >filename.txt 2>&1
 
 # Simplified redirection syntax, not preferred
-echo "Hello World" &> filename.txt
+echo "Hello World" &>filename.txt
 ```
 
-Enable exit on error and on undefined variables, enable exit code of a pipeline to that of the rightmost command to exit with a non-zero status, and output the error line using trap
+Enable exit on error and on undefined variables, enable exit code of a pipeline to 
+that of the rightmost command to exit with a non-zero status, and output the error line using trap
 ```sh
 set -euo pipefail
-trap 'echo "[ERROR] ${BASH_SOURCE}:${LINENO} ${BASH_COMMAND}" >&2' ERR
+trap 'echo "[ERROR] Error executing ${BASH_SOURCE}:${LINENO} ${BASH_COMMAND}" >&2' ERR
 ```
 
 Enable exit on error, reference http://blog.jobbole.com/111514/
@@ -48,9 +49,13 @@ start() {
 }
 start || echo >&2 'some_server failed'
 ```
-the `-e` setting is ignored within the function body (because the function is a command in an AND-OR list other than the last). Therefore, if `some_server` fails (such as command not found), the function carries on to echo "some_server started successfully", and the exit status of the function is zero (which means "some_server failed" is not output).
+The `-e` option is ignored within the function body (because the function is a command
+in an AND-OR list other than the last). Therefore, if `some_server` fails (such as
+command not found), the function carries on to echo "some_server started successfully",
+and the exit status of the function is zero (which means "some_server failed" is not output).
 
-To run command without exit on failure while having `-e` setting enabled, use `||`. Reference https://stackoverflow.com/questions/28899561/termporarily-disable-set-e-set-o-errexit-in-bash
+To run command without exit on failure while having `-e` setting enabled, use `||`.
+Reference https://stackoverflow.com/questions/28899561/termporarily-disable-set-e-set-o-errexit-in-bash
 ```sh
 # Noop
 not_exist_command || :
@@ -58,7 +63,35 @@ not_exist_command || :
 not_exist_command || true
 ```
 
-Use lowercase with underscores for local variables, uppercase with underscores for environment variables and internal shell variables. Reference https://stackoverflow.com/questions/673055/correct-bash-and-shell-script-variable-capitalization
+Notice that `-e` option is ignored when combined with `declare` or `local` or `readonly`.
+Reference https://stackoverflow.com/a/34444326/1131246
+```bash
+set -e
+declare my_var=$(ls --badoption)
+echo Success
+```
+
+To workaround on the above, separate `declare` and variable set
+```bash
+set -e
+declare my_var
+my_var=$(ls --badoption)
+echo Success
+```
+
+For readonly variable, set read only later
+```bash
+set -e
+declare my_var
+my_var=value1
+declare -r my_var
+my_var=value2
+echo Success
+```
+
+Use lowercase with underscores for local variables, uppercase with underscores for
+environment variables and internal shell variables.
+Reference https://stackoverflow.com/questions/673055/correct-bash-and-shell-script-variable-capitalization
 ```sh
 # Lowercase variable name, preferred
 student_name="foo"
@@ -87,7 +120,8 @@ echo ${foo}   bar
 echo "${foo}   bar"
 ```
 
-Prefer curly braces around shell variables, reference https://stackoverflow.com/questions/8748831/when-do-we-need-curly-braces-around-shell-variables
+Prefer curly braces around shell variables,
+reference https://stackoverflow.com/questions/8748831/when-do-we-need-curly-braces-around-shell-variables
 ```sh
 # Curly braces, preferred and required in this case
 echo "${foo}bar"
@@ -97,7 +131,8 @@ echo "bar$foo"
 echo "$foo"
 ```
 
-Prefer dollar over backtick for command execution, reference https://askubuntu.com/questions/487554/using-backticks-or-dollar-in-shell-scripts
+Prefer dollar over backtick for command execution,
+reference https://askubuntu.com/questions/487554/using-backticks-or-dollar-in-shell-scripts
 ```sh
 # Dollar, preferred
 foo=$(echo "foo's")
@@ -108,7 +143,8 @@ foo=`echo "foo's"`
 echo "$foo"
 ```
 
-Prefer single square bracket for portability, reference https://stackoverflow.com/questions/669452/is-double-square-brackets-preferable-over-single-square-brackets-in-ba
+Prefer single square bracket for portability,
+reference https://stackoverflow.com/questions/669452/is-double-square-brackets-preferable-over-single-square-brackets-in-ba
 ```sh
 foo='not   exist'
 # Single square bracket, portable but require quote
@@ -126,7 +162,8 @@ else
 fi
 ```
 
-Use `readonly` for constant or read only variables, reference http://blog.jobbole.com/111514/
+Use `readonly` or `declare -r` for constant or read only variables, reference http://blog.jobbole.com/111514/
 ```sh
-readonly passwd_file="/etc/passwd"
+readonly passwd_file1="/etc/passwd"
+declare -r passwd_file2="/etc/passwd"
 ```
