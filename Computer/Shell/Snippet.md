@@ -35,3 +35,29 @@ alias rm='echo "You are in production environment - rm is disabled, use trash or
 # Combine with above to prevent `sudo rm`
 alias sudo='sudo '
 ```
+
+Retry function
+```bash
+retry() {
+	declare -ir retry=$1
+	declare -i attempt=0
+	declare -i rc=255
+	declare -i sleep_count=0
+	while [ $rc -ne 0 ] && [ $attempt -le $retry ]; do
+		if [ $attempt -gt 0 ]; then
+			echo -n "Wait ${attempt} seconds for retry #${attempt}"
+			sleep_count=0
+			while  [ $sleep_count -lt $attempt ]; do
+				sleep_count=$(( sleep_count + 1 ))
+				sleep 1
+				echo -n .
+			done
+			echo
+		fi
+		attempt=$(( attempt + 1 ))
+		"${@:2}" && rc=$? || rc=$?
+	done
+	return $rc
+}
+retry 2 ls -l /non-exist-path
+```
