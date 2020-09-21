@@ -8,9 +8,9 @@ echo "Hello World" &>filename.txt
 ```
 
 Enable exit on error and on undefined variables, enable exit code of a pipeline to 
-that of the rightmost command to exit with a non-zero status, and output the error line using trap
+that of the rightmost command to exit with a non-zero status, enable and output the error line using trap
 ```sh
-set -euo pipefail
+set -Eeuo pipefail
 trap 'echo "[ERROR] Error executing ${BASH_SOURCE}:${LINENO} ${BASH_COMMAND}" >&2' ERR
 ```
 
@@ -35,9 +35,12 @@ set -x
 set -o xtrace
 ```
 
-Enable command in shell function inherit ERR trap, reference https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+Enable shell functions, command substitutions, and commands executed in a sub‐shell environment
+inherited ERR trp, reference https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 ```sh
 set -E
+# Long form, same as above
+set -o errtrace
 ```
 
 However, application writers should avoid relying on `set -e` within functions. For example, in the following script:
