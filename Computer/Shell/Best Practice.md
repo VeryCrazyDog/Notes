@@ -8,7 +8,8 @@ echo "Hello World" &>filename.txt
 ```
 
 Enable exit on error and on undefined variables, enable exit code of a pipeline to 
-that of the rightmost command to exit with a non-zero status, enable and output the error line using trap
+that of the rightmost command to exit with a non-zero status, enable ERR trap inheritance,
+and output the error line using trap
 ```sh
 set -Eeuo pipefail
 trap 'echo "[ERROR] Error executing ${BASH_SOURCE}:${LINENO} ${BASH_COMMAND}" >&2' ERR
