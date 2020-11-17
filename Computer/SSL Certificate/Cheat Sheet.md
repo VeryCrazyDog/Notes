@@ -164,7 +164,7 @@ rm client_cert_ext.conf
 
 Generate a private key using RSA 2048 bits and a self-signed SHA256 V3 certificate with 10 years life
 ```sh
-openssl req -newkey rsa:2048 -nodes -sha256 -keyout server.key -x509 -days 3650 -out server.crt -utf8 -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname"
+openssl req -newkey rsa:2048 -nodes -sha256 -keyout server.key -x509 -days 3650 -out server.crt -utf8 -subj "/C=HK/ST=state/L=city/O=organization/OU=department/CN=commonname" -addext "subjectAltName=DNS:example.com,DNS:www.example.net,IP:10.0.0.1"
 ```
 
 Create a new CA serial
