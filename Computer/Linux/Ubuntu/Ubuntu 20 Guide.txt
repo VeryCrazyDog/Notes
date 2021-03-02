@@ -1,0 +1,23 @@
+select-editor
+
+sudo dpkg-reconfigure cloud-init
+# Keep only 'None: Failsafe datasource'
+sudo apt purge cloud-init
+sudo rm -rf /etc/cloud/
+sudo rm -rf /var/lib/cloud/
+
+sudo apt autoremove --purge snapd gnome-software-plugin-snap
+sudo rm -rf /var/cache/snapd/
+rm -fr ~/snap
+rm -fr /snap
+
+sudo timedatectl set-timezone Asia/Hong_Kong
+timedatectl
+
+sudo apt update
+sudo apt dist-upgrade
+sudo reboot
+sudo apt autoremove
+
+sudo vim /etc/update-manager/release-upgrades
+# Set 'Prompt=never'
