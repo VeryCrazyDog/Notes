@@ -14,6 +14,9 @@ rm -fr /snap
 sudo timedatectl set-timezone Asia/Hong_Kong
 timedatectl
 
+sudo vim /etc/netplan/00-installer-config.yml
+# Set 'optional: true' under network interface node
+
 sudo apt update
 sudo apt dist-upgrade
 sudo reboot
