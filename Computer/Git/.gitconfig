@@ -4,8 +4,14 @@
 	email = VeryCrazyDog@gmail.com
 [core]
 	autocrlf = false
-[pull]
-	ff = only
+[init]
+	defaultBranch = main
 [fetch]
 	prune = true
 	pruneTags = true
+[pull]
+	ff = only
+[rebase]
+	autosquash = true
+[submodule]
+	recurse = true
