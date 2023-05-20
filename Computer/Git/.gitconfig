@@ -1,7 +1,7 @@
 # This is Git's per-user configuration file.
 [user]
 	name = VCD
-	email = VeryCrazyDog@gmail.com
+	email = 
 [core]
 	autocrlf = false
 [init]
@@ -11,6 +11,8 @@
 	pruneTags = true
 [pull]
 	ff = only
+[push]
+	autoSetupRemote = true
 [rebase]
 	autosquash = true
 [submodule]
