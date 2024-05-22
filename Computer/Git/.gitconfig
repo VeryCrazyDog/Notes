@@ -4,6 +4,7 @@
 	email = 
 [core]
 	autocrlf = false
+	symlinks = false
 [init]
 	defaultBranch = main
 [fetch]
