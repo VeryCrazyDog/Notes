@@ -60,6 +60,12 @@ Shows list of files installed by a package
 pacman -Ql package_name
 ```
 
+Query database whih package owns a command or file
+
+```sh
+pacman -Qo keyword
+```
+
 Rebuilding pacman keyring
 
 ```sh
