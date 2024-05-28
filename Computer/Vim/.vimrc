@@ -26,3 +26,7 @@ set ignorecase
 " When there is a previous search pattern, highlight all its matches
 " https://vimhelp.org/options.txt.html#%27hlsearch%27
 set hlsearch
+
+" Load color scheme
+" https://vimhelp.org/syntax.txt.html#%3Acolorscheme
+colorscheme evening
